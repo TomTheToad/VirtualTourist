@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11232" systemVersion="16D32" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Album" syncable="YES">
+    <entity name="Album" representedClassName=".Album" syncable="YES">
         <attribute name="creationDate" attributeType="Date" usesScalarValueType="NO" indexed="YES" syncable="YES"/>
         <attribute name="latitude" attributeType="String" syncable="YES"/>
         <attribute name="longitude" attributeType="String" syncable="YES"/>
         <attribute name="name" attributeType="String" indexed="YES" syncable="YES"/>
         <relationship name="hasImages" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Image" inverseName="withinAlbum" inverseEntity="Image" syncable="YES"/>
     </entity>
-    <entity name="Image" syncable="YES">
+    <entity name="Image" representedClassName=".Image" syncable="YES">
         <attribute name="imageData" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="withinAlbum" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Album" inverseName="hasImages" inverseEntity="Album" syncable="YES"/>
