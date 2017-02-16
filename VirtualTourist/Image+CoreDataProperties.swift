@@ -2,13 +2,13 @@
 //  Image+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by VICTOR ASSELTA on 2/14/17.
+//  Created by VICTOR ASSELTA on 2/16/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
 
 import Foundation
 import CoreData
-import 
+
 
 extension Image {
 
