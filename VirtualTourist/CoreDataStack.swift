@@ -14,11 +14,31 @@ class CoreDataStack {
     
     // Fields
     static let moduleName = "VirtualTourist"
+    var modelURL: URL {
+        get{
+            return Bundle.main.url(forResource: CoreDataStack.moduleName, withExtension: "momd")!
+        }
+    }
+    
+    let fileManager = FileManager.default
+    
+    var docURL: URL {
+        get{
+            return self.fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        }
+    }
+    
+    var dbURL: URL {
+        get {
+        
+        return self.docURL.appendingPathComponent("model.sqlite")
+        }
+    }
     
     
     // Managed Object Model
     lazy var managedObjectModel: NSManagedObjectModel = {
-        let modelURL = Bundle.main.url(forResource: moduleName, withExtension: "momd")!
+        let modelURL = self.modelURL
         return NSManagedObjectModel(contentsOf: modelURL)!
     }()
     
@@ -51,6 +71,41 @@ class CoreDataStack {
         return managedObjectContext
     }()
     
+    init() {
+        // Options for migration
+        let options = [NSInferMappingModelAutomaticallyOption: true,NSMigratePersistentStoresAutomaticallyOption: true]
+        
+        do {
+            try addStoreCoordinator(NSSQLiteStoreType, configuration: nil, storeURL: dbURL, options: options as [NSObject : AnyObject]?)
+        } catch {
+            print("unable to add store at \(dbURL)")
+        }
+    }
+    
+    /* Utility Methods */
+    func addStoreCoordinator(_ storeType: String, configuration: String?, storeURL: URL, options : [NSObject:AnyObject]?) throws {
+        try persistentStoreCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: dbURL, options: nil)
+    }
+    
+    func autoSave(_ delayInSeconds : Int) {
+        
+        if delayInSeconds > 0 {
+            do {
+                try saveMainContext()
+                print("Autosaving")
+            } catch {
+                print("Error while autosaving")
+            }
+            
+            let delayInNanoSeconds = UInt64(delayInSeconds) * NSEC_PER_SEC
+            let time = DispatchTime.now() + Double(Int64(delayInNanoSeconds)) / Double(NSEC_PER_SEC)
+            
+            DispatchQueue.main.asyncAfter(deadline: time) {
+                self.autoSave(delayInSeconds)
+            }
+        }
+    }
+    
     
     /* Methods */
     // todo: dispatch to custom synch queue?
@@ -58,5 +113,12 @@ class CoreDataStack {
         if managedObjectContext.hasChanges {
                 try managedObjectContext.save()
         }
+    }
+    
+    func dropAllData() throws {
+        // delete all the objects in the db. This won't delete the files, it will
+        // just leave empty tables.
+        try persistentStoreCoordinator.destroyPersistentStore(at: dbURL, ofType:NSSQLiteStoreType , options: nil)
+        try addStoreCoordinator(NSSQLiteStoreType, configuration: nil, storeURL: dbURL, options: nil)
     }
 }
