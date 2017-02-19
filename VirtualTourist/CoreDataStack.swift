@@ -13,80 +13,66 @@ class CoreDataStack {
     
     
     // Fields
+    // Set Module name
     static let moduleName = "VirtualTourist"
+    
+    // URL for CoreDataStack module "momd" file
     var modelURL: URL {
         get{
             return Bundle.main.url(forResource: CoreDataStack.moduleName, withExtension: "momd")!
         }
     }
     
-    let fileManager = FileManager.default
-    
-    var docURL: URL {
+    // URL for documents directory
+    var documentDirectoryURL: URL {
         get{
-            return self.fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         }
     }
     
-    var dbURL: URL {
+    // URL for SQLLite database
+    var databaseURL: URL {
         get {
         
-        return self.docURL.appendingPathComponent("model.sqlite")
+        return self.documentDirectoryURL.appendingPathComponent("model.sqlite")
         }
     }
     
     
     // Managed Object Model
     lazy var managedObjectModel: NSManagedObjectModel = {
-        let modelURL = self.modelURL
-        return NSManagedObjectModel(contentsOf: modelURL)!
+        return NSManagedObjectModel(contentsOf: self.modelURL)!
     }()
-    
-    
-    // Helper to access documents directory for app
-    lazy var applicationDocumentDirectory: URL = {
-        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
-    }()
-    
     
     // Persistent Store Coordinator
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        
-        let persistentStoreURL = self.applicationDocumentDirectory.appendingPathComponent("\(moduleName).sqlite")
-        
-        // Attempt to add a persistend store to the coordinator
-        do {
-            try coordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: persistentStoreURL, options: [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true])
-        } catch {
-            fatalError("Persistent store error! \(error)")
-        }
-        
         return coordinator
     }()
     
+    // Managed Object Context
     lazy var managedObjectContext: NSManagedObjectContext = {
-        let managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = self.persistentStoreCoordinator
         return managedObjectContext
     }()
     
+    // Initializer
+    // todo: This was moved into the init method.
+    // Determine if this means that unnecessary Stores are being added each time file is initialized.
     init() {
         // Options for migration
         let options = [NSInferMappingModelAutomaticallyOption: true,NSMigratePersistentStoresAutomaticallyOption: true]
         
         do {
-            try addStoreCoordinator(NSSQLiteStoreType, configuration: nil, storeURL: dbURL, options: options as [NSObject : AnyObject]?)
+            try addPersistentStoreCoordinator(NSSQLiteStoreType, configuration: nil, storeURL: databaseURL, options: options as [NSObject : AnyObject]?)
         } catch {
-            print("unable to add store at \(dbURL)")
+            print("unable to add store at \(databaseURL)")
         }
     }
+
     
-    /* Utility Methods */
-    func addStoreCoordinator(_ storeType: String, configuration: String?, storeURL: URL, options : [NSObject:AnyObject]?) throws {
-        try persistentStoreCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: dbURL, options: nil)
-    }
-    
+    /* Main Methods */
     func autoSave(_ delayInSeconds : Int) {
         
         if delayInSeconds > 0 {
@@ -106,8 +92,7 @@ class CoreDataStack {
         }
     }
     
-    
-    /* Methods */
+
     // todo: dispatch to custom synch queue?
     func saveMainContext() throws {
         if managedObjectContext.hasChanges {
@@ -115,10 +100,17 @@ class CoreDataStack {
         }
     }
     
+    
+    /* Utility Methods */
+    func addPersistentStoreCoordinator(_ storeType: String, configuration: String?, storeURL: URL, options : [NSObject:AnyObject]?) throws {
+        try persistentStoreCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: databaseURL, options: nil)
+    }
+    
+    
     func dropAllData() throws {
         // delete all the objects in the db. This won't delete the files, it will
         // just leave empty tables.
-        try persistentStoreCoordinator.destroyPersistentStore(at: dbURL, ofType:NSSQLiteStoreType , options: nil)
-        try addStoreCoordinator(NSSQLiteStoreType, configuration: nil, storeURL: dbURL, options: nil)
+        try persistentStoreCoordinator.destroyPersistentStore(at: databaseURL, ofType:NSSQLiteStoreType , options: nil)
+        try addPersistentStoreCoordinator(NSSQLiteStoreType, configuration: nil, storeURL: databaseURL, options: nil)
     }
 }
