@@ -14,7 +14,7 @@ class CoreDataStack {
     
     // Fields
     // Set Module name
-    static let moduleName = "VirtualTourist"
+    static let moduleName = "VirtualTouristModel"
     
     // URL for CoreDataStack module "momd" file
     var modelURL: URL {
