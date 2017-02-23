@@ -15,11 +15,13 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let coreData = appDelegate.coreDataStack
+        let managedObjectContext = coreData.managedObjectContext
         
-        let image = Image()
+        
+        let image = Image(context: managedObjectContext)
         image.title = "TestImage"
         
-        let coreData = appDelegate.coreDataStack
         
         do {
             try coreData.saveMainContext()
