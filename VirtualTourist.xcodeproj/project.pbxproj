@@ -17,7 +17,7 @@
 		C7B77A191E5251B600755DF7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7B77A181E5251B600755DF7 /* Assets.xcassets */; };
 		C7B77A1C1E5251B600755DF7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C7B77A1A1E5251B600755DF7 /* LaunchScreen.storyboard */; };
 		C7B77A271E52534100755DF7 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B77A261E52534100755DF7 /* CoreDataStack.swift */; };
-		C7E415EE1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C7E415EC1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodeld */; };
+		C7E415EE1E53CE6700A120F4 /* VirtualTourist.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C7E415EC1E53CE6700A120F4 /* VirtualTourist.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,7 +33,7 @@
 		C7B77A1B1E5251B600755DF7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C7B77A1D1E5251B600755DF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C7B77A261E52534100755DF7 /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
-		C7E415ED1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = VirtualTouristModel.xcdatamodel; sourceTree = "<group>"; };
+		C7E415ED1E53CE6700A120F4 /* VirtualTourist.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = VirtualTourist.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,7 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				C7B77A261E52534100755DF7 /* CoreDataStack.swift */,
-				C7E415EC1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodeld */,
+				C7E415EC1E53CE6700A120F4 /* VirtualTourist.xcdatamodeld */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -179,7 +179,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7E415EE1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodeld in Sources */,
+				C7E415EE1E53CE6700A120F4 /* VirtualTourist.xcdatamodeld in Sources */,
 				C7B77A271E52534100755DF7 /* CoreDataStack.swift in Sources */,
 				C7B77A141E5251AA00755DF7 /* ViewController.swift in Sources */,
 				C7002E321E5666370037E162 /* Image+CoreDataProperties.swift in Sources */,
@@ -353,13 +353,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		C7E415EC1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodeld */ = {
+		C7E415EC1E53CE6700A120F4 /* VirtualTourist.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				C7E415ED1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodel */,
+				C7E415ED1E53CE6700A120F4 /* VirtualTourist.xcdatamodel */,
 			);
-			currentVersion = C7E415ED1E53CE6700A120F4 /* VirtualTouristModel.xcdatamodel */;
-			path = VirtualTouristModel.xcdatamodeld;
+			currentVersion = C7E415ED1E53CE6700A120F4 /* VirtualTourist.xcdatamodel */;
+			path = VirtualTourist.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};
