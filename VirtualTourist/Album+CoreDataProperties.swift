@@ -16,7 +16,7 @@ extension Album {
         return NSFetchRequest<Album>(entityName: "Album");
     }
 
-    @NSManaged public var creationDate: NSDate?
+    @NSManaged public var creationDate: Date?
     @NSManaged public var latitude: String?
     @NSManaged public var longitude: String?
     @NSManaged public var name: String?

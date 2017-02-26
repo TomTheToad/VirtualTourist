@@ -8,7 +8,7 @@
         <relationship name="hasImages" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Image" inverseName="withinAlbum" inverseEntity="Image" syncable="YES"/>
     </entity>
     <entity name="Image" representedClassName="Image" syncable="YES">
-        <attribute name="imageData" optional="YES" attributeType="Transformable" syncable="YES"/>
+        <attribute name="imageData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES" syncable="YES"/>
         <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="withinAlbum" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Album" inverseName="hasImages" inverseEntity="Album" syncable="YES"/>
     </entity>

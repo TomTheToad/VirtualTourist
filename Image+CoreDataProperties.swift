@@ -2,7 +2,7 @@
 //  Image+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by VICTOR ASSELTA on 2/16/17.
+//  Created by VICTOR ASSELTA on 2/26/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
 
@@ -16,7 +16,7 @@ extension Image {
         return NSFetchRequest<Image>(entityName: "Image");
     }
 
-    @NSManaged public var imageData: NSObject?
+    @NSManaged public var imageData: NSData?
     @NSManaged public var title: String?
     @NSManaged public var withinAlbum: Album?
 
