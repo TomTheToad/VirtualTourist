@@ -9,25 +9,12 @@
 import UIKit
 
 class ViewController: UIViewController {
-    
-    // Fields
-    let appDelegate = AppDelegate()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        let coreData = appDelegate.coreDataStack
-        let managedObjectContext = coreData.managedObjectContext
+        // flickr test
+        let flickr = FlickrAPIController()
         
-        
-        let image = Image(context: managedObjectContext)
-        image.title = "TestImage"
-        
-        
-        do {
-            try coreData.saveMainContext()
-        } catch {
-            print("WARNING: Core Data did not save")
-        }
     }
-}
 
+}
