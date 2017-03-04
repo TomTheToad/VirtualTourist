@@ -13,38 +13,9 @@ class FlickrAPIController {
     // Fields
     // Flickr application key
     let key = "f3faa7b346140c4f70790665703a4247"
-    // Flickr method
-    // let method = "flickr.places.findByLatLon"
     let method = "flickr.photos.search"
     let session = URLSession(configuration: .ephemeral)
     let baseURLString = "https://api.flickr.com/services/rest/"
-    
-    // let request: URLRequest?
-    
-    // Test fields (lat and lon for Portland Maine)
-        let latitude = "43.662"
-        let longitude = "-70.255"
-    
-    
-    init() {
-
-        
-        do {
-            try getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: {
-                (error, dict) in
-                
-                if let thisError = error {
-                    print("ERROR: \(thisError)")
-                } else {
-                    for item in dict! {
-                        print("key: \(item.key) = \(item.value)")
-                    }
-                }
-            })
-        } catch {
-            print("Error calling getPhotosIDList")
-        }
-    }
     
     
     // Custom errors for this API
