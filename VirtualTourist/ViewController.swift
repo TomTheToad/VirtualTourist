@@ -17,23 +17,26 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // flickr test
-        let flickr = FlickrAPIController()
+//        let flickr = FlickrAPIController()
+//        
+//        do {
+//            try flickr.getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: {
+//                (error, dict) in
+//                
+//                if let thisError = error {
+//                    print("ERROR: \(thisError)")
+//                } else {
+//                    for item in dict! {
+//                        print("\(item.key) = \(item.value)")
+//                    }
+//                }
+//            })
+//        } catch {
+//            print("Error calling getPhotosIDList")
+//        }
         
-        do {
-            try flickr.getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: {
-                (error, dict) in
-                
-                if let thisError = error {
-                    print("ERROR: \(thisError)")
-                } else {
-                    for item in dict! {
-                        print("\(item.key) = \(item.value)")
-                    }
-                }
-            })
-        } catch {
-            print("Error calling getPhotosIDList")
-        }
+
+        
         
     }
 

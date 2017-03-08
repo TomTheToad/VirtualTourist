@@ -15,19 +15,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var coreDataStack = CoreDataStack()
     
-    // This doesn't make much sense.
-    // Probably instantiate a class that finds the user location or set a default instead?
-    // Should probably just create a key with default values in the plist.
-    func checkForPreviousMapLocation() {
-//        if((UserDefaults.standard.stringArray(forKey: "previousMapLocation")) != nil) {
-//            // do nothing
-//        } else {
-//            UserDefaults.standard.set(["empty", "empty"], forKey: "previousMapLocation")
-//        }
+    let latitude = "43.662"
+    let longitude = "-70.255"
+    
+    func checkIfFirstLaunch() {
+        if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore")) {
+            print("App has launched before.")
+        } else {
+            print("This is the first launch ever!")
+            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            UserDefaults.standard.setValuesForKeys(["latitude": latitude, "longitude": longitude])
+            UserDefaults.standard.synchronize()
+        }
     }
 
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        checkForPreviousMapLocation()
+        checkIfFirstLaunch()
         return true
     }
 
