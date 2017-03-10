@@ -21,6 +21,27 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         super.viewDidLoad()
         checkForPreviousMapLocation()
         setMapViewLocation()
+        
+        // test sub view
+        let collectionViewController = CollectionViewController()
+        
+        let collectionViewFrame = CGRect(x: 260, y: 340, width: 200, height: 250)
+        
+        // Programmatically or use xib?
+        let layout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
+        layout.itemSize = CGSize(width: 111, height: 111)
+        
+        let collectionView = UICollectionView(frame: collectionViewFrame, collectionViewLayout: layout)
+        collectionView.delegate = collectionViewController
+        collectionView.dataSource = collectionViewController
+        collectionView.backgroundColor = UIColor.blue
+        
+        view.addSubview(collectionView)
+
+        // Do in MapViewController?
+        // colView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+
     }
     
     func checkForPreviousMapLocation() {
@@ -37,7 +58,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let center = previousLocation?.coordinate
         let region = MKCoordinateRegion(center: center!, span: span)
         mapView.setRegion(region, animated: true)
-        
     }
 
 
