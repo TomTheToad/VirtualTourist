@@ -19,9 +19,33 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        mapView.delegate = self
+        
         checkForPreviousMapLocation()
         setMapViewLocation()
+        dropTestPin(latitude: (previousLocation?.coordinate.latitude)!, longitude: (previousLocation?.coordinate.longitude)!)
+    }
+
+    
+    func checkForPreviousMapLocation() {
+        let previousLatitude = UserDefaults.standard.double(forKey: "latitude")
+        let previousLongitude = UserDefaults.standard.double(forKey: "longitude")
         
+        print("returned location = lat:\(previousLatitude), long\(previousLongitude)")
+        
+        previousLocation = CLLocation(latitude: previousLatitude, longitude: previousLongitude)
+    }
+    
+    
+    func setMapViewLocation() {
+        let span = MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+        let center = previousLocation?.coordinate
+        let region = MKCoordinateRegion(center: center!, span: span)
+        mapView.setRegion(region, animated: true)
+    }
+    
+    
+    func progCollectionViewTest() {
         // test sub view
         let collectionViewController = CollectionViewController()
         
@@ -38,27 +62,63 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         collectionView.backgroundColor = UIColor.blue
         
         view.addSubview(collectionView)
-
+        
         // Do in MapViewController?
         // colView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
-
     }
     
-    func checkForPreviousMapLocation() {
-        let previousLatitude = UserDefaults.standard.double(forKey: "latitude")
-        let previousLongitude = UserDefaults.standard.double(forKey: "longitude")
+    
+    func dropTestPin(latitude: Double, longitude: Double) {
+       
+        let location = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         
-        print("returned location = lat:\(previousLatitude), long\(previousLongitude)")
+        let annotation = MKPointAnnotation()
+     
+        annotation.coordinate = location
+        annotation.title = "Test Pin"
         
-        previousLocation = CLLocation(latitude: previousLatitude, longitude: previousLongitude)
+        mapView.addAnnotation(annotation)
     }
     
-    func setMapViewLocation() {
-        let span = MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
-        let center = previousLocation?.coordinate
-        let region = MKCoordinateRegion(center: center!, span: span)
-        mapView.setRegion(region, animated: true)
+    
+    func presentCollectionView() {
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "CollectionView") else {
+            print("MESSAGE: Failed to instantiate collection view controller")
+            return
+        }
+        
+        present(controller, animated: false, completion: {
+            print("MESSAGE: CollectionView Called")
+        })
     }
-
+    
+    
+    // Configure mapView
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        let reuseId = "pin"
+        
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
+        
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = true
+            pinView!.pinTintColor = UIColor.orange
+            pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+        
+        return pinView
+    }
+    
+    
+    // Allow mapView location bubble click through to give student mediaURL in safari.
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        if control == view.rightCalloutAccessoryView {
+            presentCollectionView()
+        }
+    }
 
 }
