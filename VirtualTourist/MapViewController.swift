@@ -12,13 +12,14 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     // Fields
-    let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
+    // let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
     
     // Fields
-    var previousLocation: CLLocation?
+    var previousLocation: CLLocationCoordinate2D?
+    var locationManager = CLLocationManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,11 +33,17 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Set starting location
         setMapViewLocation()
         
-        // Test functions below
-        dropTestPin(latitude: (previousLocation?.coordinate.latitude)!, longitude: (previousLocation?.coordinate.longitude)!)
+        // Configure core location
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        locationManager.requestWhenInUseAuthorization()
         
-        longPressRecognizer.minimumPressDuration = 1.0
-        mapView.addGestureRecognizer(longPressRecognizer)
+        // Test functions below
+        dropTestPin()
+        
+        // longPressRecognizer.minimumPressDuration = 1.0
+        // mapView.addGestureRecognizer(longPressRecognizer)
+        mapView.showsUserLocation = true
     }
 
     
@@ -46,7 +53,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         print("returned location = lat:\(previousLatitude), long\(previousLongitude)")
         
-        previousLocation = CLLocation(latitude: previousLatitude, longitude: previousLongitude)
+        // previousLocation = CLLocation(latitude: previousLatitude, longitude: previousLongitude)
+        previousLocation = CLLocationCoordinate2DMake(previousLatitude, previousLongitude)
     }
     
     // Configure mapView
@@ -71,9 +79,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     
     func setMapViewLocation() {
-        let regionRadius: CLLocationDistance = 10000
+        let regionRadius: CLLocationDistance = 15000
         
-        let coordinateRegion = MKCoordinateRegionMakeWithDistance((previousLocation?.coordinate)!, regionRadius, regionRadius)
+        let coordinateRegion = MKCoordinateRegionMakeWithDistance(previousLocation!, regionRadius, regionRadius)
         
         mapView.setRegion(coordinateRegion, animated: true)
     }
@@ -100,37 +108,41 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     // Test functions
-    func progCollectionViewTest() {
-        // test sub view
-        let collectionViewController = CollectionViewController()
-        
-        let collectionViewFrame = CGRect(x: 260, y: 340, width: 200, height: 250)
-        
-        // Programmatically or use xib?
-        let layout = UICollectionViewFlowLayout()
-        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
-        layout.itemSize = CGSize(width: 111, height: 111)
-        
-        let collectionView = UICollectionView(frame: collectionViewFrame, collectionViewLayout: layout)
-        collectionView.delegate = collectionViewController
-        collectionView.dataSource = collectionViewController
-        collectionView.backgroundColor = UIColor.blue
-        
-        view.addSubview(collectionView)
-        
-        // Do in MapViewController?
-        // colView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
-    }
+//    func progCollectionViewTest() {
+//        // test sub view
+//        let collectionViewController = CollectionViewController()
+//        
+//        let collectionViewFrame = CGRect(x: 260, y: 340, width: 200, height: 250)
+//        
+//        // Programmatically or use xib?
+//        let layout = UICollectionViewFlowLayout()
+//        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 10, right: 10)
+//        layout.itemSize = CGSize(width: 111, height: 111)
+//        
+//        let collectionView = UICollectionView(frame: collectionViewFrame, collectionViewLayout: layout)
+//        collectionView.delegate = collectionViewController
+//        collectionView.dataSource = collectionViewController
+//        collectionView.backgroundColor = UIColor.blue
+//        
+//        view.addSubview(collectionView)
+//        
+//        // Do in MapViewController?
+//        // colView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+//    }
     
     
-    func dropTestPin(latitude: Double, longitude: Double) {
-       
-        let location = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    func dropTestPin() {
         
+//        let latitude = previousLocation!.coordinate.latitude
+//        let longitude = previousLocation!.coordinate.longitude
+        
+//        let location = CLLocationCoordinate2DMake(latitude, longitude)
         let annotation = MKPointAnnotation()
      
-        annotation.coordinate = location
+        annotation.coordinate = previousLocation!
         annotation.title = "Test Pin"
+        
+        print("Annotation: \(annotation.description)")
         
         mapView.addAnnotation(annotation)
     }
@@ -138,18 +150,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     // Collection View
     func presentCollectionView() {
-        guard let controller = storyboard?.instantiateViewController(withIdentifier: "CollectionView") else {
-            print("MESSAGE: Failed to instantiate collection view controller")
-            return
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
+                print("MESSAGE: Failed to instantiate collection view controller")
+                return
         }
         
+        controller.receivedMapLocation = previousLocation!
+        
         present(controller, animated: false, completion: {
-            print("MESSAGE: CollectionView Called")
+            print("MESSAGE: DetailView Called")
         })
     }
 
 }
 
-extension MapViewController {
+extension MapViewController: CLLocationManagerDelegate {
     
 }

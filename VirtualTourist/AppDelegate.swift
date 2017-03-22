@@ -15,8 +15,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var coreDataStack = CoreDataStack()
     
-    let latitude = "43.662"
-    let longitude = "-70.255"
+    let latitude = "43.7615"
+    let longitude = "-70.3553"
     
     func checkIfFirstLaunch() {
         if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore")) {
