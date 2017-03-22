@@ -32,13 +32,11 @@ class CollectionViewController: UICollectionViewController {
 
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 6
+        return 12
     }
 
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of items
         return 3
     }
 
@@ -46,7 +44,7 @@ class CollectionViewController: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewCell", for: indexPath) as! CollectionViewCell
     
         // Configure the cell
-        cell.backgroundColor = UIColor.blue
+        cell.backgroundColor = UIColor.green
         cell.textLabel!.text = "\((indexPath as NSIndexPath).row)"
     
         return cell
