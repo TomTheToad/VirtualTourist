@@ -11,6 +11,8 @@ import Foundation
 class FlickrAPIController {
     
     // Fields
+    let responseCheck = URLResponseCheck()
+    
     // Flickr application key
     let key = "f3faa7b346140c4f70790665703a4247"
     let method = "flickr.photos.search"
@@ -35,17 +37,22 @@ class FlickrAPIController {
     // flickr.photos.search
     // lat, lon, radius, accuracy, safe_search, unit, radius_units, page, per_page
     // return a dictionary
-    func getPhotosIDList(latitude: String, longitude: String, completionHander: @escaping (Error?, NSDictionary?) -> Void) throws {
+    func getPhotosIDList(latitude: String, longitude: String, completionHander: @escaping (Error?, [String]?) -> Void) throws {
         
-        let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&page=1&per_page=20"
+        let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&page=1&per_page=21"
         
         let request = URLRequest(url: URL(string: url)!)
         
         let task = session.dataTask(with: request, completionHandler: {
             (data, response, error) in
             
-            if let thisReponse = response {
-                print("RESPONSE: \(thisReponse.description)")
+            if let thisResponse = response {
+                let responseCheck = self.responseCheck.checkReponse(thisResponse)
+                if responseCheck.0 != true {
+                    // todo: create custom errors
+                    print("NETWORK ERROR: \(responseCheck.1)")
+                    return
+                }
             }
             
             if let thisError = error {
@@ -53,6 +60,7 @@ class FlickrAPIController {
             }
             
             guard let thisData = data else {
+                // todo: add response check
                 if let error = error  {
                     completionHander(FlickrErrors.NetworkRequestError(returnError: error), nil)
                     return
@@ -81,15 +89,51 @@ class FlickrAPIController {
 
             print("parsedResults: \(parsedResults)")
 
-            let photos = parsedResults!.value(forKey: "photos") as! NSDictionary
-            print("photos: \(photos.allKeys)")
+            let photos = parsedResults!.value(forKeyPath: "photos.photo") as! [NSDictionary]
+            // print("photos: \(photos.allKeys)")
             
-            completionHander(nil, photos)
+            print("photos: \(photos)")
+            
+            let urls = self.FlickrDictToURL(dictionary: photos)
+            
+            for item in urls {
+                print(item)
+            }
+            
+            completionHander(nil, urls)
               
         })
         
         task.resume()
         
+    }
+    
+    func FlickrDictToURL(dictionary: [NSDictionary]) -> [String] {
+        /*
+        https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
+        or
+        https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}_[mstzb].jpg
+        or
+        https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{o-secret}_o.(jpg|gif|png)
+         */
+        
+        var urlsArray = [String]()
+        
+        for image in dictionary {
+            // change all to guard
+            let farmID = image.value(forKey: "farm")
+            let serverID = image.value(forKey: "server")
+            let secret = image.value(forKey: "secret")
+            let id = image.value(forKey: "id")
+            let url = "https://farm\(farmID!).staticflickr.com/\(serverID!)/\(id!)_\(secret!).jpg"
+            urlsArray.append(url)
+        }
+        
+        return urlsArray
+    }
+    
+    func getPhotosFetchedResultsController() {
+        // todo: add this functionality
     }
 
 }

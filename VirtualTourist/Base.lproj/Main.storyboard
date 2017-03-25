@@ -52,12 +52,11 @@
                                 <subviews>
                                     <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="inp-1o-gdn">
                                         <constraints>
-                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="211" id="xAi-Fs-RbL"/>
                                             <constraint firstAttribute="height" constant="211" id="xIk-Mv-9SL"/>
                                         </constraints>
                                     </mapView>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="xVp-Mq-XyN">
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="A6q-B0-Rs6">
                                             <size key="itemSize" width="200" height="200"/>
                                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -91,18 +90,14 @@
                                         </cells>
                                     </collectionView>
                                 </subviews>
-                                <constraints>
-                                    <constraint firstItem="inp-1o-gdn" firstAttribute="leading" secondItem="Xsa-NX-dXU" secondAttribute="leading" id="A8T-DT-XHx"/>
-                                    <constraint firstAttribute="trailing" secondItem="inp-1o-gdn" secondAttribute="trailing" id="U4V-7U-tE4"/>
-                                </constraints>
                             </stackView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="Xsa-NX-dXU" secondAttribute="trailing" id="6o0-Ln-UGU"/>
-                            <constraint firstItem="Xsa-NX-dXU" firstAttribute="leading" secondItem="ta9-O3-ZR7" secondAttribute="leading" id="fiG-fb-feR"/>
-                            <constraint firstAttribute="bottom" secondItem="Xsa-NX-dXU" secondAttribute="bottom" id="hEb-cT-1Eg"/>
-                            <constraint firstItem="Xsa-NX-dXU" firstAttribute="top" secondItem="sTU-bF-fl3" secondAttribute="bottom" id="s4z-uv-7Of"/>
+                            <constraint firstItem="Xsa-NX-dXU" firstAttribute="leading" secondItem="ta9-O3-ZR7" secondAttribute="leading" id="ZLF-wg-FAh"/>
+                            <constraint firstItem="Xsa-NX-dXU" firstAttribute="top" secondItem="sTU-bF-fl3" secondAttribute="bottom" id="bX8-W5-jsr"/>
+                            <constraint firstItem="4iF-b9-1qs" firstAttribute="top" secondItem="Xsa-NX-dXU" secondAttribute="bottom" id="fYT-0n-pQq"/>
+                            <constraint firstAttribute="trailing" secondItem="Xsa-NX-dXU" secondAttribute="trailing" id="xI2-xx-IU6"/>
                         </constraints>
                     </view>
                     <connections>
