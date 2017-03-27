@@ -24,7 +24,8 @@ class FlickrAPIController {
     enum FlickrErrors: Error {
         case ApplicationError(msg: String)
         case NetworkRequestError(returnError: Error)
-        case XMLParseError
+        case URLResponse(response: URLResponse)
+        case JSONParseError
     }
     
     
@@ -49,18 +50,18 @@ class FlickrAPIController {
             if let thisResponse = response {
                 let responseCheck = self.responseCheck.checkReponse(thisResponse)
                 if responseCheck.0 != true {
-                    // todo: create custom errors
+                    completionHander(FlickrErrors.URLResponse(response: thisResponse), nil)
                     print("NETWORK ERROR: \(responseCheck.1)")
                     return
                 }
             }
             
             if let thisError = error {
+                completionHander(thisError, nil)
                 print("ERROR: \(thisError)")
             }
             
             guard let thisData = data else {
-                // todo: add response check
                 if let error = error  {
                     completionHander(FlickrErrors.NetworkRequestError(returnError: error), nil)
                     return
@@ -69,7 +70,7 @@ class FlickrAPIController {
                         completionHander(FlickrErrors.ApplicationError(msg: "Unknown Error"), nil)
                         return
                     }
-                    completionHander(FlickrErrors.ApplicationError(msg: (thisResponse.description)), nil)
+                    completionHander(FlickrErrors.URLResponse(response: thisResponse), nil)
                     return
                 }
             }
@@ -78,29 +79,14 @@ class FlickrAPIController {
             
             let result = NSString(data: thisData, encoding: String.Encoding.utf8.rawValue)
             print("result: \(result)")
-            
-            var parsedResults: NSDictionary?
 
             do {
-                parsedResults = try JSONSerialization.jsonObject(with: thisData, options: .allowFragments) as? NSDictionary
+                let photosDict = try self.ParseJSONToNSDict(JSONData: thisData)
+                let urlsArray = try self.FlickrDictToURL(dictionary: photosDict)
+                completionHander(nil, urlsArray)
             } catch {
-                print("Printed on the label: DOES NOT WORK!")
+                completionHander(FlickrErrors.JSONParseError, nil)
             }
-
-            print("parsedResults: \(parsedResults)")
-
-            let photos = parsedResults!.value(forKeyPath: "photos.photo") as! [NSDictionary]
-            // print("photos: \(photos.allKeys)")
-            
-            print("photos: \(photos)")
-            
-            let urls = self.FlickrDictToURL(dictionary: photos)
-            
-            for item in urls {
-                print(item)
-            }
-            
-            completionHander(nil, urls)
               
         })
         
@@ -108,7 +94,26 @@ class FlickrAPIController {
         
     }
     
-    func FlickrDictToURL(dictionary: [NSDictionary]) -> [String] {
+    
+    func ParseJSONToNSDict(JSONData: Data) throws -> [NSDictionary] {
+        var parsedResults: NSDictionary?
+        
+        do {
+            parsedResults = try JSONSerialization.jsonObject(with: JSONData, options: .allowFragments) as? NSDictionary
+        } catch {
+            throw FlickrErrors.JSONParseError
+        }
+        
+        if let photos = parsedResults?.value(forKeyPath: "photos.photo") as! [NSDictionary]? {
+            return photos
+        } else {
+            throw FlickrErrors.JSONParseError
+        }
+
+    }
+    
+    
+    func FlickrDictToURL(dictionary: [NSDictionary]) throws -> [String] {
         /*
         https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
         or
@@ -142,14 +147,11 @@ class FlickrAPIController {
                 let id = image.value(forKey: "id") {
                     let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
                     urlsArray.append(url)
+            } else {
+                throw FlickrErrors.JSONParseError
             }
         }
         
         return urlsArray
     }
-    
-    func getPhotosFetchedResultsController() {
-        // todo: add this functionality
-    }
-
 }
