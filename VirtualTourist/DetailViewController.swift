@@ -111,16 +111,16 @@ extension DetailViewController {
         }
     }
     
-    func getLocationImagesCompletionHandler(error: Error?, photoIds: [String]?) -> Void {
-        if error != nil {
+    func getLocationImagesCompletionHandler(error: Error?, urls: [String]?) -> Void {
+        if error == nil {
             // handle error
             if let error = error {
-                print("Error: \(error.localizedDescription)")
+                print("ERROR: \(error.localizedDescription)")
             } else {
-                if let ids = photoIds {
-                    print("DetailView received ids: \(ids)")
+                if let urls = urls {
+                    print("DetailView received ids: \(urls)")
                 } else {
-                    print("ERROR: photo ids failure: \(photoIds)")
+                    print("ERROR: missing returned urls")
                 }
             }
         }

@@ -151,7 +151,6 @@ class FlickrAPIController {
                 throw FlickrErrors.JSONParseError
             }
         }
-        
         return urlsArray
     }
 }

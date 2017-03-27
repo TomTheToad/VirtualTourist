@@ -130,11 +130,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         controller.receivedMapLocation = previousLocation!
         
-        present(controller, animated: false, completion: {
-            print("MESSAGE: DetailView Called")
-        })
+        present(controller, animated: false, completion: nil)
     }
-
 }
 
 extension MapViewController: CLLocationManagerDelegate {
