@@ -28,7 +28,7 @@
                             <constraint firstItem="buz-71-l7J" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="tYy-rf-FIV"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="rd4-q3-MGw"/>
+                    <navigationItem key="navigationItem" id="RkA-74-fTm"/>
                     <connections>
                         <outlet property="mapView" destination="buz-71-l7J" id="J4I-TY-J13"/>
                     </connections>

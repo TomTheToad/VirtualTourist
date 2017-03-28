@@ -24,10 +24,26 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         navigationItem.title = "Virtual Tourist"
         
-        let editButton = UIBarButtonItem()
-        editButton.title = "Edit"
+        let editButton = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(ShowToolBar(sender:)))
+
         
         navigationItem.rightBarButtonItem = editButton
+        
+        let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let toolBarButtonLabel = UIBarButtonItem(title: "Select Pins to Delete", style: .plain, target: self, action: nil)
+        toolBarButtonLabel.tintColor = UIColor.white
+        
+        navigationController?.toolbar.barTintColor = UIColor.red
+        toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
+        // navigationController?.setToolbarHidden(true, animated: false)
+    }
+    
+    func ShowToolBar(sender: UIBarButtonItem) {
+        if navigationController?.toolbar.isHidden != false {
+            navigationController?.setToolbarHidden(false, animated: true)
+        } else {
+            navigationController?.setToolbarHidden(true, animated: true)
+        }
     }
     
     override func viewDidLoad() {
@@ -145,6 +161,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         navigationItem.backBarButtonItem = backItem
         navigationController?.pushViewController(controller, animated: true)
     }
+    
 }
 
 extension MapViewController: CLLocationManagerDelegate {
