@@ -21,6 +21,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     var previousLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
     
+    override func viewWillAppear(_ animated: Bool) {
+        navigationItem.title = "Virtual Tourist"
+        
+        let editButton = UIBarButtonItem()
+        editButton.title = "Edit"
+        
+        navigationItem.rightBarButtonItem = editButton
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
