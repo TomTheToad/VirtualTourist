@@ -130,7 +130,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         controller.receivedMapLocation = previousLocation!
         
-        present(controller, animated: false, completion: nil)
+        let backItem = UIBarButtonItem()
+        backItem.title = "OK"
+        
+        navigationItem.backBarButtonItem = backItem
+        navigationController?.pushViewController(controller, animated: true)
     }
 }
 

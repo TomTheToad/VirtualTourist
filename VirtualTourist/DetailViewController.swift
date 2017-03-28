@@ -20,7 +20,6 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var collectionView: UICollectionView!
 
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
