@@ -12,7 +12,7 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate {
 
     // Fields
-    // let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
+//    let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -20,6 +20,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     // Fields
     var previousLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
+    var doDeletePins = false
     
     override func viewWillAppear(_ animated: Bool) {
         navigationItem.title = "Virtual Tourist"
@@ -41,16 +42,26 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func ShowToolBar(sender: UIBarButtonItem) {
         if navigationController?.toolbar.isHidden != false {
             navigationController?.setToolbarHidden(false, animated: true)
+            doDeletePins = true
         } else {
             navigationController?.setToolbarHidden(true, animated: true)
+            doDeletePins = false
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
         // mapView delegate
         mapView.delegate = self
+        mapView.mapType = .standard
+        mapView.isRotateEnabled = false
+        
+        // Gesture Recognizer
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addAnnotation(_:)))
+        longPressRecognizer.isEnabled = true
+        mapView.addGestureRecognizer(longPressRecognizer)
         
         // Check UserDefaults for previous location
         checkForPreviousMapLocation()
@@ -65,9 +76,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Test functions below
         dropTestPin()
-        
-        // longPressRecognizer.minimumPressDuration = 1.0
-        // mapView.addGestureRecognizer(longPressRecognizer)
         mapView.showsUserLocation = true
     }
 
@@ -111,19 +119,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.setRegion(coordinateRegion, animated: true)
     }
     
-    
-    // Configure User Pin drop
-    func handleLongPress(_ gestureRecognizer : UIGestureRecognizer) {
-        if gestureRecognizer.state != .began { return }
-        let touchPoint = gestureRecognizer.location(in: mapView)
-        let touchMapCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
-        let thisAnnotation = MKPointAnnotation()
-        thisAnnotation.coordinate = touchMapCoordinate
-        thisAnnotation.title = "test pin drop"
-        
-        mapView.addAnnotation(thisAnnotation)
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        if doDeletePins == true {
+            mapView.removeAnnotation(view.annotation!)
+        } else {
+            print("Pin Tapped")
+        }
     }
-    
     
     // Allow mapView location bubble click through to give student mediaURL in safari.
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
@@ -165,5 +167,51 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 }
 
 extension MapViewController: CLLocationManagerDelegate {
+    
+
+//    func addAnnotation(gestureRecognizer:UIGestureRecognizer){
+//        if gestureRecognizer.state == UIGestureRecognizerState.Began {
+//            var touchPoint = gestureRecognizer.locationInView(map)
+//            var newCoordinates = map.convertPoint(touchPoint, toCoordinateFromView: map)
+//            let annotation = MKPointAnnotation()
+//            annotation.coordinate = newCoordinates
+//            
+//            CLGeocoder().reverseGeocodeLocation(CLLocation(latitude: newCoordinates.latitude, longitude: newCoordinates.longitude), completionHandler: {(placemarks, error) -> Void in
+//                if error != nil {
+//                    println("Reverse geocoder failed with error" + error.localizedDescription)
+//                    return
+//                }
+//                
+//                if placemarks.count > 0 {
+//                    let pm = placemarks[0] as! CLPlacemark
+//                    
+//                    // not all places have thoroughfare & subThoroughfare so validate those values
+//                    annotation.title = pm.thoroughfare + ", " + pm.subThoroughfare
+//                    annotation.subtitle = pm.subLocality
+//                    self.map.addAnnotation(annotation)
+//                    println(pm)
+//                }
+//                else {
+//                    annotation.title = "Unknown Place"
+//                    self.map.addAnnotation(annotation)
+//                    println("Problem with the data received from geocoder")
+//                }
+//                places.append(["name":annotation.title,"latitude":"\(newCoordinates.latitude)","longitude":"\(newCoordinates.longitude)"])
+//            })
+//        }
+//    }
+    
+    // todo: change method to touch and another to add
+    func addAnnotation(_ gestureRecognizer: UIGestureRecognizer) {
+        print("addAnnotation called")
+        if gestureRecognizer.state == .began {
+            let touchPoint = gestureRecognizer.location(in: mapView)
+            let newCoords = mapView.convert(touchPoint, toCoordinateFrom: mapView)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = newCoords
+            annotation.title = "User Added Point"
+            mapView.addAnnotation(annotation)
+        }
+    }
     
 }
