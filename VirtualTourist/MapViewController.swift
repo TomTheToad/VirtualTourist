@@ -10,17 +10,14 @@ import UIKit
 import MapKit
 
 class MapViewController: UIViewController, MKMapViewDelegate {
-
-    // Fields
-//    let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.handleLongPress(_:)))
-    
-    // IBOutlets
-    @IBOutlet weak var mapView: MKMapView!
     
     // Fields
     var previousLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
     var doDeletePins = false
+    
+    // IBOutlets
+    @IBOutlet weak var mapView: MKMapView!
     
     override func viewWillAppear(_ animated: Bool) {
         navigationItem.title = "Virtual Tourist"
@@ -37,6 +34,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         navigationController?.toolbar.barTintColor = UIColor.red
         toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
         // navigationController?.setToolbarHidden(true, animated: false)
+        
+        // Clears selected pin(s)
+        deselectAllPins()
     }
     
     func ShowToolBar(sender: UIBarButtonItem) {
@@ -57,6 +57,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.delegate = self
         mapView.mapType = .standard
         mapView.isRotateEnabled = false
+        
         
         // Gesture Recognizer
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addAnnotation(_:)))
@@ -86,7 +87,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         print("returned location = lat:\(previousLatitude), long\(previousLongitude)")
         
-        // previousLocation = CLLocation(latitude: previousLatitude, longitude: previousLongitude)
         previousLocation = CLLocationCoordinate2DMake(previousLatitude, previousLongitude)
     }
     
@@ -99,11 +99,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = true
             pinView!.pinTintColor = UIColor.orange
-            pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
-        }
-        else {
+        } else {
             pinView!.annotation = annotation
         }
         
@@ -123,18 +120,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if doDeletePins == true {
             mapView.removeAnnotation(view.annotation!)
         } else {
-            print("Pin Tapped")
-        }
-    }
-    
-    // Allow mapView location bubble click through to give student mediaURL in safari.
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        if control == view.rightCalloutAccessoryView {
             presentCollectionView()
         }
     }
     
-    
+
     func dropTestPin() {
 
         let annotation = MKPointAnnotation()
@@ -203,7 +193,6 @@ extension MapViewController: CLLocationManagerDelegate {
     
     // todo: change method to touch and another to add
     func addAnnotation(_ gestureRecognizer: UIGestureRecognizer) {
-        print("addAnnotation called")
         if gestureRecognizer.state == .began {
             let touchPoint = gestureRecognizer.location(in: mapView)
             let newCoords = mapView.convert(touchPoint, toCoordinateFrom: mapView)
@@ -211,6 +200,15 @@ extension MapViewController: CLLocationManagerDelegate {
             annotation.coordinate = newCoords
             annotation.title = "User Added Point"
             mapView.addAnnotation(annotation)
+        }
+    }
+    
+    // helper
+    // Make sure any pins are deselected
+    func deselectAllPins() {
+        let selectedAnnotations = mapView.selectedAnnotations
+        for pinAnnotation in selectedAnnotations {
+            mapView.deselectAnnotation(pinAnnotation, animated: false)
         }
     }
     
