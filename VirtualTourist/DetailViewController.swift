@@ -32,7 +32,7 @@ class DetailViewController: UIViewController {
         collectionView!.dataSource = self
         
         // TEST
-        getLocationImageIDs()
+        // getLocationImageIDs()
         
     }
 

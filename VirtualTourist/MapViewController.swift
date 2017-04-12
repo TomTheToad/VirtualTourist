@@ -13,6 +13,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     // Fields
     var previousLocation: CLLocationCoordinate2D?
+    var lastLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
     var doDeletePins = false
     
@@ -120,9 +121,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if doDeletePins == true {
             mapView.removeAnnotation(view.annotation!)
         } else {
-            // presentCollectionView()
+            lastLocation = view.annotation?.coordinate
+            presentCollectionView()
             // todo: change to current pin location
-            getLocationImageIDs(mapLocation: previousLocation!)
+            // getLocationImageIDs(mapLocation: previousLocation!)
             
         }
     }
@@ -185,6 +187,7 @@ extension MapViewController: CLLocationManagerDelegate {
             annotation.coordinate = newCoords
             annotation.title = "User Added Point"
             mapView.addAnnotation(annotation)
+            getLocationImageIDs(mapLocation: newCoords)
         }
     }
     
@@ -213,6 +216,8 @@ extension MapViewController {
         let longitude: String = (mapLocation.longitude.description)
         print("longitude: \(longitude)")
         
+        lastLocation = mapLocation
+        
         let flickr = FlickrAPIController()
         
         do {
@@ -232,7 +237,8 @@ extension MapViewController {
                 if let urls = urls {
                     print("DetailView received ids: \(urls)")
                     DispatchQueue.main.async(execute: { ()-> Void in
-                        self.presentCollectionView(location: self.previousLocation!, urls: urls)
+                        self.presentCollectionView(location: self.lastLocation!, urls: urls)
+                        print("lastLocation: \(self.lastLocation!)")
                     })
                 } else {
                     print("ERROR: missing returned urls")
@@ -252,7 +258,7 @@ extension MapViewController {
             return
         }
         
-        controller.receivedMapLocation = previousLocation!
+        controller.receivedMapLocation = lastLocation!
         
         let backItem = UIBarButtonItem()
         backItem.title = "OK"
