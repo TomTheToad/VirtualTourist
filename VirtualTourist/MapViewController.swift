@@ -120,7 +120,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         if doDeletePins == true {
             mapView.removeAnnotation(view.annotation!)
         } else {
-            presentCollectionView()
+            // presentCollectionView()
+            // todo: change to current pin location
+            getLocationImageIDs(mapLocation: previousLocation!)
+            
         }
     }
     
@@ -136,24 +139,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         mapView.addAnnotation(annotation)
     }
-    
-    
-    // Collection View
-    func presentCollectionView() {
-        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
-                print("MESSAGE: Failed to instantiate collection view controller")
-                return
-        }
-        
-        controller.receivedMapLocation = previousLocation!
-        
-        let backItem = UIBarButtonItem()
-        backItem.title = "OK"
-        
-        navigationItem.backBarButtonItem = backItem
-        navigationController?.pushViewController(controller, animated: true)
-    }
-    
 }
 
 extension MapViewController: CLLocationManagerDelegate {
@@ -211,5 +196,84 @@ extension MapViewController: CLLocationManagerDelegate {
             mapView.deselectAnnotation(pinAnnotation, animated: false)
         }
     }
+}
+
+extension MapViewController {
     
+    // Fields
+    // var receivedMapLocation: CLLocationCoordinate2D?
+    
+    func getLocationImageIDs(mapLocation: CLLocationCoordinate2D) {
+        // Get images
+        // todo: will probably need to update the api to use
+        // a fetchedResultsController
+        
+        let latitude: String = (mapLocation.latitude.description)
+        print("latitude: \(latitude)")
+        let longitude: String = (mapLocation.longitude.description)
+        print("longitude: \(longitude)")
+        
+        let flickr = FlickrAPIController()
+        
+        do {
+            try flickr.getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: getLocationImagesCompletionHandler)
+        } catch {
+            // Handle error
+            print("ERROR: Something Happened")
+        }
+    }
+    
+    func getLocationImagesCompletionHandler(error: Error?, urls: [String]?) -> Void {
+        if error == nil {
+            // handle error
+            if let error = error {
+                print("ERROR: \(error.localizedDescription)")
+            } else {
+                if let urls = urls {
+                    print("DetailView received ids: \(urls)")
+                    DispatchQueue.main.async(execute: { ()-> Void in
+                        self.presentCollectionView(location: self.previousLocation!, urls: urls)
+                    })
+                } else {
+                    print("ERROR: missing returned urls")
+                }
+            }
+        }
+    }
+}
+
+
+extension MapViewController {
+    
+    // Collection View
+    func presentCollectionView() {
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
+            print("MESSAGE: Failed to instantiate collection view controller")
+            return
+        }
+        
+        controller.receivedMapLocation = previousLocation!
+        
+        let backItem = UIBarButtonItem()
+        backItem.title = "OK"
+        
+        navigationItem.backBarButtonItem = backItem
+        navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    func presentCollectionView(location: CLLocationCoordinate2D, urls: [String]) {
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
+            print("MESSAGE: Failed to instantiate collection view controller")
+            return
+        }
+        
+        controller.receivedMapLocation = location
+        controller.receivedURLS = urls
+        
+        let backItem = UIBarButtonItem()
+        backItem.title = "OK"
+        
+        navigationItem.backBarButtonItem = backItem
+        navigationController?.pushViewController(controller, animated: true)
+    }
 }

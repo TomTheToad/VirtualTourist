@@ -13,6 +13,7 @@ class DetailViewController: UIViewController {
     
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
+    var receivedURLS: [String]?
     
     var receivedImageIDs: NSDictionary?
     
