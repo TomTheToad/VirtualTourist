@@ -80,14 +80,50 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        // let id = receivedImageIDs?["\(indexPath)"] as! NSDictionary
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
-        
-        // Configure the cell
         cell.backgroundColor = UIColor.green
-        cell.textLabel!.text = "\((indexPath as NSIndexPath).row)"
-        // cell.textLabel!.text = id.value(forKeyPath: "id") as! String?
+        
+        // let thisImageView = cell.imageView!
+        
+        guard let id = receivedURLS?[(indexPath as NSIndexPath).row] else {
+            print("ERROR: NO id received")
+            cell.textLabel!.text = "broken image"
+            return cell
+        }
+        
+        do {
+            let url = try convertStringToURL(string: id)
+            downloadImageFromFlikrURL(url: url, completionHandler: {
+                (data, response, error) in
+                
+                if error == nil {
+                    // todo: check for data
+                    DispatchQueue.main.async(execute: { ()-> Void in
+                        // thisImageView.image = UIImage(data: data!)
+                        cell.imageView.image = UIImage(data: data!)
+                        cell.activityIndicator.stopAnimating()
+                    })
+                } else {
+                    guard let thisResponse = response else {
+                        print("DV: No response")
+                        return
+                    }
+                    
+                    print("Response: \(thisResponse)")
+                    
+                    guard let thisError = error else {
+                        print("Error: No error")
+                        return
+                    }
+                    
+                    print("Error: \(thisError)")
+                }
+                
+            })
+        } catch {
+            cell.textLabel!.text = "broken image"
+        }
+        
         
         return cell
     }
@@ -95,6 +131,23 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
 }
 
 extension DetailViewController {
+    
+    func convertStringToURL(string: String) throws -> URL {
+        
+        guard let url = URL(string: string) else {
+            throw DetailViewControllerErrors.failedToConvertToURL
+        }
+        
+        return url
+        
+    }
+    
+    func downloadImageFromFlikrURL(url: URL, completionHandler: @escaping (_ data: Data?,_ repsonse: URLResponse?,_ error: Error?) -> Void) {
+        URLSession.shared.dataTask(with: url, completionHandler: {
+            (data, response, error) in
+            completionHandler(data, response, error)
+        }).resume()
+    }
     
     func getLocationImageIDs() {
         // Get images
@@ -129,5 +182,11 @@ extension DetailViewController {
                 }
             }
         }
+    }
+}
+
+extension DetailViewController {
+    enum DetailViewControllerErrors: Error {
+        case failedToConvertToURL
     }
 }

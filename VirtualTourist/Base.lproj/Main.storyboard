@@ -86,14 +86,28 @@
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
+                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="cKu-b2-4aF">
+                                                            <rect key="frame" x="0.0" y="0.0" width="200" height="200"/>
+                                                        </imageView>
+                                                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="R5Q-ae-8c7">
+                                                            <rect key="frame" x="90" y="90" width="20" height="20"/>
+                                                        </activityIndicatorView>
                                                     </subviews>
                                                 </view>
                                                 <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <constraints>
+                                                    <constraint firstItem="R5Q-ae-8c7" firstAttribute="centerX" secondItem="A1K-Mv-nea" secondAttribute="centerX" id="0QK-1h-AY8"/>
+                                                    <constraint firstItem="R5Q-ae-8c7" firstAttribute="top" secondItem="A1K-Mv-nea" secondAttribute="top" id="BIA-NM-k51"/>
+                                                    <constraint firstItem="cKu-b2-4aF" firstAttribute="centerY" secondItem="A1K-Mv-nea" secondAttribute="centerY" id="HHx-GW-bk4"/>
                                                     <constraint firstItem="A1K-Mv-nea" firstAttribute="centerY" secondItem="bu7-5V-U7T" secondAttribute="centerY" id="JJb-MH-Kk4"/>
+                                                    <constraint firstItem="cKu-b2-4aF" firstAttribute="top" secondItem="bu7-5V-U7T" secondAttribute="top" id="McL-C8-tAy"/>
+                                                    <constraint firstItem="cKu-b2-4aF" firstAttribute="centerX" secondItem="A1K-Mv-nea" secondAttribute="centerX" id="YKg-hg-KZS"/>
                                                     <constraint firstItem="A1K-Mv-nea" firstAttribute="centerX" secondItem="bu7-5V-U7T" secondAttribute="centerX" id="oXl-U5-9km"/>
+                                                    <constraint firstItem="cKu-b2-4aF" firstAttribute="leading" secondItem="bu7-5V-U7T" secondAttribute="leading" id="ynv-Cr-yjG"/>
                                                 </constraints>
                                                 <connections>
+                                                    <outlet property="activityIndicator" destination="R5Q-ae-8c7" id="kfj-IT-nfU"/>
+                                                    <outlet property="imageView" destination="cKu-b2-4aF" id="D4Z-Ib-kyK"/>
                                                     <outlet property="textLabel" destination="A1K-Mv-nea" id="fCH-3C-43C"/>
                                                 </connections>
                                             </collectionViewCell>
@@ -117,7 +131,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="I7H-7M-2kj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2292" y="115"/>
+            <point key="canvasLocation" x="2292" y="114.69265367316342"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="fyU-Nb-dh3">
