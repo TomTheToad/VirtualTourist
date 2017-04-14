@@ -34,20 +34,25 @@ class DetailViewController: UIViewController {
         // TEST
         // getLocationImageIDs()
         
+        setMapViewLocation(location: receivedMapLocation)
+        
     }
 
 }
 
+
 extension DetailViewController: MKMapViewDelegate {
-    
-    func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
-        setMapViewLocation()
-    }
-    
-    func setMapViewLocation() {
+
+    func setMapViewLocation(location: CLLocationCoordinate2D?) {
         let regionRadius: CLLocationDistance = 3000
         
-        let coordinateRegion = MKCoordinateRegionMakeWithDistance(receivedMapLocation!, regionRadius, regionRadius)
+        guard let thisLocation = location else {
+            // todo: create an error
+            print("WARNING: Missing map location")
+            return
+        }
+        
+        let coordinateRegion = MKCoordinateRegionMakeWithDistance(thisLocation, regionRadius, regionRadius)
         
         mapView.setRegion(coordinateRegion, animated: true)
     }

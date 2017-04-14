@@ -122,6 +122,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             mapView.removeAnnotation(view.annotation!)
         } else {
             lastLocation = view.annotation?.coordinate
+            print("lastLocation: \(lastLocation!)")
             presentCollectionView()
             // todo: change to current pin location
             // getLocationImageIDs(mapLocation: previousLocation!)
