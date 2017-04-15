@@ -1,5 +1,5 @@
 //
-//  Album+CoreDataClass.swift
+//  Image+CoreDataClass.swift
 //  VirtualTourist
 //
 //  Created by VICTOR ASSELTA on 4/14/17.
@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-@objc(Album)
-public class Album: NSManagedObject {
+@objc(Image)
+public class Image: NSManagedObject {
 
 }

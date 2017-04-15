@@ -2,7 +2,7 @@
 //  Album+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by VICTOR ASSELTA on 2/16/17.
+//  Created by VICTOR ASSELTA on 4/14/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
 
@@ -13,10 +13,9 @@ import CoreData
 extension Album {
 
     @nonobjc public class func fetchRequest() -> NSFetchRequest<Album> {
-        return NSFetchRequest<Album>(entityName: "Album");
+        return NSFetchRequest<Album>(entityName: "Album")
     }
 
-    @NSManaged public var creationDate: Date?
     @NSManaged public var latitude: String?
     @NSManaged public var longitude: String?
     @NSManaged public var name: String?
