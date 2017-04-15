@@ -21,11 +21,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet weak var mapView: MKMapView!
     
     override func viewWillAppear(_ animated: Bool) {
+        
+        // Configure navigationView
         navigationItem.title = "Virtual Tourist"
         
         let editButton = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(ShowToolBar(sender:)))
 
-        
         navigationItem.rightBarButtonItem = editButton
         
         let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -53,7 +54,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         // mapView delegate
         mapView.delegate = self
         mapView.mapType = .standard
@@ -77,11 +77,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         locationManager.requestWhenInUseAuthorization()
         
         // Test functions below
-        dropTestPin()
+        // dropTestPin()
         mapView.showsUserLocation = true
     }
 
-    
     func checkForPreviousMapLocation() {
         let previousLatitude = UserDefaults.standard.double(forKey: "latitude")
         let previousLongitude = UserDefaults.standard.double(forKey: "longitude")
@@ -108,7 +107,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return pinView
     }
     
-    
     func setMapViewLocation() {
         let regionRadius: CLLocationDistance = 15000
         
@@ -130,7 +128,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-
     func dropTestPin() {
 
         let annotation = MKPointAnnotation()
@@ -144,9 +141,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 }
 
+
 extension MapViewController: CLLocationManagerDelegate {
     
-
 //    func addAnnotation(gestureRecognizer:UIGestureRecognizer){
 //        if gestureRecognizer.state == UIGestureRecognizerState.Began {
 //            var touchPoint = gestureRecognizer.locationInView(map)
@@ -248,7 +245,6 @@ extension MapViewController {
         }
     }
 }
-
 
 extension MapViewController {
     

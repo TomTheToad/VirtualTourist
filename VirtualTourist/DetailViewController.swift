@@ -14,7 +14,6 @@ class DetailViewController: UIViewController {
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
     var receivedURLS: [String]?
-    
     var receivedImageIDs: NSDictionary?
     
     // IBOutlets
@@ -40,7 +39,6 @@ class DetailViewController: UIViewController {
 
 }
 
-
 extension DetailViewController: MKMapViewDelegate {
 
     func setMapViewLocation(location: CLLocationCoordinate2D?) {
@@ -59,13 +57,11 @@ extension DetailViewController: MKMapViewDelegate {
     
 }
 
-
 extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
-    
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 21
@@ -124,10 +120,8 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
             cell.textLabel!.text = "broken image"
         }
         
-        
         return cell
     }
-    
 }
 
 extension DetailViewController {

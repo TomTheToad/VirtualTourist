@@ -20,7 +20,7 @@ class CoreDataController {
     
     
             let image = Image(context: managedObjectContext)
-            image.title = "TestImage"
+            image.id = "testImage"
     
     
             do {

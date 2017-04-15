@@ -11,5 +11,15 @@ import CoreData
 
 @objc(Album)
 public class Album: NSManagedObject {
+    
+    convenience init(name: String, latitude: String, longitude: String, context: NSManagedObjectContext) {
+        
+        if let albumEntity = NSEntityDescription.entity(forEntityName: "Album", in: context) {
+            self.init(entity: albumEntity, insertInto: context)
+            self.name = name
+        } else {
+            fatalError("Unable to find Album Entity!")
+        }
+    }
 
 }

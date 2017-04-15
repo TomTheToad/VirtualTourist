@@ -77,7 +77,7 @@ class FlickrAPIController {
             
             // print("thisData is emtpy?: \(thisData.isEmpty)")
             
-            let result = NSString(data: thisData, encoding: String.Encoding.utf8.rawValue)
+            // let result = NSString(data: thisData, encoding: String.Encoding.utf8.rawValue)
             // print("result: \(result!)")
 
             do {
