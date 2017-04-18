@@ -7,18 +7,28 @@
 //
 
 import Foundation
+import CoreData
 
 class CoreDataController {
+    let coreData: CoreDataStack = {
+       return AppDelegate().coreDataStack
+    }()
     
-    // Fields
-    let appDelegate = AppDelegate()
+    let managedObjectContext: NSManagedObjectContext = {
+        let coreData = AppDelegate().coreDataStack
+        return coreData.managedObjectContext
+    }()
+    
+//    func getCoreData() -> CoreDataStack {
+//        return coreData
+//    }
+//    
+//    func getManagedObjectContext() -> NSManagedObjectContext {
+//        return managedObjectContext
+//    }
     
     func coreDataTest() {
     /// Begin CoreData Test ///
-            let coreData = appDelegate.coreDataStack
-            let managedObjectContext = coreData.managedObjectContext
-    
-    
             let image = Image(context: managedObjectContext)
             image.id = "testImage"
     

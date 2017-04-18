@@ -8,6 +8,7 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class DetailViewController: UIViewController {
     
@@ -15,6 +16,9 @@ class DetailViewController: UIViewController {
     var receivedMapLocation: CLLocationCoordinate2D?
     var receivedURLS: [String]?
     var receivedImageIDs: NSDictionary?
+    let coreData: CoreDataStack = {
+        return AppDelegate().coreDataStack
+    }()
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -143,25 +147,25 @@ extension DetailViewController {
         }).resume()
     }
     
-    func getLocationImageIDs() {
-        // Get images
-        // todo: will probably need to update the api to use
-        // a fetchedResultsController
-        
-        let latitude: String = (receivedMapLocation?.latitude.description)!
-        print("latitude: \(latitude)")
-        let longitude: String = (receivedMapLocation?.longitude.description)!
-        print("longitude: \(longitude)")
-        
-        let flickr = FlickrAPIController()
-        
-        do {
-            try flickr.getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: getLocationImagesCompletionHandler)
-        } catch {
-            // Handle error
-            print("ERROR: Something Happened")
-        }
-    }
+//    func getLocationImageIDs() {
+//        // Get images
+//        // todo: will probably need to update the api to use
+//        // a fetchedResultsController
+//        
+//        let latitude: String = (receivedMapLocation?.latitude.description)!
+//        print("latitude: \(latitude)")
+//        let longitude: String = (receivedMapLocation?.longitude.description)!
+//        print("longitude: \(longitude)")
+//        
+//        let flickr = FlickrAPIController()
+//        
+//        do {
+//            try flickr.getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: getLocationImagesCompletionHandler)
+//        } catch {
+//            // Handle error
+//            print("ERROR: Something Happened")
+//        }
+//    }
     
     func getLocationImagesCompletionHandler(error: Error?, urls: [String]?) -> Void {
         if error == nil {

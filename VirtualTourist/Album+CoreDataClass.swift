@@ -17,6 +17,8 @@ public class Album: NSManagedObject {
         if let albumEntity = NSEntityDescription.entity(forEntityName: "Album", in: context) {
             self.init(entity: albumEntity, insertInto: context)
             self.name = name
+            self.latitude = latitude
+            self.longitude = longitude
         } else {
             fatalError("Unable to find Album Entity!")
         }
