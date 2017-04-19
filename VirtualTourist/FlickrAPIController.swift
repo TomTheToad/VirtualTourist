@@ -7,18 +7,21 @@
 //
 
 import Foundation
+import CoreData
 
 class FlickrAPIController {
     
     // Fields
     let responseCheck = URLResponseCheck()
+    let managedObjectContext: NSManagedObjectContext = {
+        return AppDelegate().coreDataStack.managedObjectContext
+    }()
     
     // Flickr application key
     let key = "f3faa7b346140c4f70790665703a4247"
     let method = "flickr.photos.search"
     let session = URLSession(configuration: .ephemeral)
     let baseURLString = "https://api.flickr.com/services/rest/"
-    
     
     // Custom errors for this API
     enum FlickrErrors: Error {
@@ -38,7 +41,8 @@ class FlickrAPIController {
     // flickr.photos.search
     // lat, lon, radius, accuracy, safe_search, unit, radius_units, page, per_page
     // return a dictionary
-    func getPhotosIDList(latitude: String, longitude: String, completionHander: @escaping (Error?, [String]?) -> Void) throws {
+     
+    func getImageArray(latitude: String, longitude: String, completionHander: @escaping (Error?, [ImageItem]?) -> Void) throws {
         
         let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&page=1&per_page=21"
         
@@ -79,21 +83,22 @@ class FlickrAPIController {
             
             // let result = NSString(data: thisData, encoding: String.Encoding.utf8.rawValue)
             // print("result: \(result!)")
-
+            
             do {
                 let photosDict = try self.ParseJSONToNSDict(JSONData: thisData)
-                let urlsArray = try self.FlickrDictToURL(dictionary: photosDict)
-                completionHander(nil, urlsArray)
+                // change here
+                let images = try self.FlickrDictToImageArray(dictionary: photosDict)
+                completionHander(nil, images)
             } catch {
                 completionHander(FlickrErrors.JSONParseError, nil)
             }
-              
+            
         })
         
         task.resume()
         
     }
-    
+
     
     func ParseJSONToNSDict(JSONData: Data) throws -> [NSDictionary] {
         var parsedResults: NSDictionary?
@@ -112,8 +117,26 @@ class FlickrAPIController {
 
     }
     
-    
-    func FlickrDictToURL(dictionary: [NSDictionary]) throws -> [String] {
+    // keep
+    func FlickrDictToImageArray(dictionary: [NSDictionary]) throws -> [ImageItem] {
+        var imagesItems = [ImageItem]()
+        
+        for image in dictionary {
+            
+            if let farmID = image.value(forKey: "farm"),
+                let serverID = image.value(forKey: "server"),
+                let secret = image.value(forKey: "secret"),
+                let id = image.value(forKey: "id") as? String {
+                let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
+                let imageItem = ImageItem(id: id, url: url)
+                imagesItems.append(imageItem)
+            } else {
+                throw FlickrErrors.JSONParseError
+            }
+        }
+        return imagesItems
+    }
+
         /*
         https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
         or
@@ -136,21 +159,4 @@ class FlickrAPIController {
          o	original image, either a jpg, gif or png, depending on source format
 
          */
-        
-        var urlsArray = [String]()
-        
-        for image in dictionary {
-            
-            if let farmID = image.value(forKey: "farm"),
-                let serverID = image.value(forKey: "server"),
-                let secret = image.value(forKey: "secret"),
-                let id = image.value(forKey: "id") {
-                    let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
-                    urlsArray.append(url)
-            } else {
-                throw FlickrErrors.JSONParseError
-            }
-        }
-        return urlsArray
-    }
 }

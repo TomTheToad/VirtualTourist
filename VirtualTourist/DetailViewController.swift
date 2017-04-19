@@ -14,8 +14,7 @@ class DetailViewController: UIViewController {
     
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
-    var receivedURLS: [String]?
-    var receivedImageIDs: NSDictionary?
+    var receivedImages: [ImageItem]?
     let coreData: CoreDataStack = {
         return AppDelegate().coreDataStack
     }()
@@ -81,18 +80,19 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
-        cell.backgroundColor = UIColor.green
+        cell.backgroundColor = .blue
         
-        // let thisImageView = cell.imageView!
-        
-        guard let id = receivedURLS?[(indexPath as NSIndexPath).row] else {
+        guard let imageItem = receivedImages?[(indexPath as NSIndexPath).row] else {
             print("ERROR: NO id received")
             cell.textLabel!.text = "broken image"
             return cell
         }
         
         do {
-            let url = try convertStringToURL(string: id)
+            print("imageID: \(imageItem.id)")
+            print("imageURL: \(imageItem.url)")
+            
+            let url = try convertStringToURL(string: imageItem.url)
             downloadImageFromFlikrURL(url: url, completionHandler: {
                 (data, response, error) in
                 
@@ -186,5 +186,6 @@ extension DetailViewController {
 extension DetailViewController {
     enum DetailViewControllerErrors: Error {
         case failedToConvertToURL
+        case ImageDataMissing
     }
 }

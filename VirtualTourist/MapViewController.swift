@@ -185,7 +185,7 @@ extension MapViewController: CLLocationManagerDelegate {
             annotation.coordinate = newCoords
             annotation.title = "User Added Point"
             mapView.addAnnotation(annotation)
-            getLocationImageIDs(mapLocation: newCoords)
+            getImages(mapLocation: newCoords)
         }
     }
     
@@ -204,7 +204,7 @@ extension MapViewController {
     // Fields
     // var receivedMapLocation: CLLocationCoordinate2D?
     
-    func getLocationImageIDs(mapLocation: CLLocationCoordinate2D) {
+    func getImages(mapLocation: CLLocationCoordinate2D) {
         // Get images
         // todo: will probably need to update the api to use
         // a fetchedResultsController
@@ -219,23 +219,23 @@ extension MapViewController {
         let flickr = FlickrAPIController()
         
         do {
-            try flickr.getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: getLocationImagesCompletionHandler)
+            try flickr.getImageArray(latitude: latitude, longitude: longitude, completionHander: getImagesCompletionHandler)
         } catch {
             // Handle error
             print("ERROR: Something Happened")
         }
     }
     
-    func getLocationImagesCompletionHandler(error: Error?, urls: [String]?) -> Void {
+    func getImagesCompletionHandler(error: Error?, imageItems: [ImageItem]?) -> Void {
         if error == nil {
             // handle error
             if let error = error {
                 print("ERROR: \(error.localizedDescription)")
             } else {
-                if let urls = urls {
-                    print("DetailView received ids: \(urls)")
+                if let images = imageItems {
+                    print("DetailView received ids: \(images)")
                     DispatchQueue.main.async(execute: { ()-> Void in
-                        self.presentCollectionView(location: self.lastLocation!, urls: urls)
+                        self.presentCollectionView(location: self.lastLocation!, imageItems: images)
                         print("lastLocation: \(self.lastLocation!)")
                     })
                 } else {
@@ -264,14 +264,15 @@ extension MapViewController {
         navigationController?.pushViewController(controller, animated: true)
     }
     
-    func presentCollectionView(location: CLLocationCoordinate2D, urls: [String]) {
+    func presentCollectionView(location: CLLocationCoordinate2D, imageItems: [ImageItem]) {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
         }
         
+        
         controller.receivedMapLocation = location
-        controller.receivedURLS = urls
+        controller.receivedImages = imageItems
         
         let backItem = UIBarButtonItem()
         backItem.title = "OK"

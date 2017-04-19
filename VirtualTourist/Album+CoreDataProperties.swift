@@ -2,7 +2,7 @@
 //  Album+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by VICTOR ASSELTA on 4/14/17.
+//  Created by VICTOR ASSELTA on 4/18/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
 
