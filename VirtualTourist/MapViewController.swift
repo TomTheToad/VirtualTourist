@@ -35,7 +35,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         navigationController?.toolbar.barTintColor = UIColor.red
         toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
-        // navigationController?.setToolbarHidden(true, animated: false)
         
         // Clears selected pin(s)
         deselectAllPins()
@@ -85,8 +84,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let previousLatitude = UserDefaults.standard.double(forKey: "latitude")
         let previousLongitude = UserDefaults.standard.double(forKey: "longitude")
         
-        print("returned location = lat:\(previousLatitude), long\(previousLongitude)")
-        
         previousLocation = CLLocationCoordinate2DMake(previousLatitude, previousLongitude)
     }
     
@@ -120,24 +117,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             mapView.removeAnnotation(view.annotation!)
         } else {
             lastLocation = view.annotation?.coordinate
-            print("lastLocation: \(lastLocation!)")
             presentCollectionView()
-            // todo: change to current pin location
-            // getLocationImageIDs(mapLocation: previousLocation!)
-            
         }
-    }
-    
-    func dropTestPin() {
-
-        let annotation = MKPointAnnotation()
-     
-        annotation.coordinate = previousLocation!
-        annotation.title = "Test Pin"
-        
-        print("Annotation: \(annotation.description)")
-        
-        mapView.addAnnotation(annotation)
     }
 }
 

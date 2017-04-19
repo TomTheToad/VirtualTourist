@@ -32,10 +32,7 @@ class DetailViewController: UIViewController {
         // Configure collectionView
         collectionView!.delegate = self
         collectionView!.dataSource = self
-        
-        // TEST
-        // getLocationImageIDs()
-        
+
         setMapViewLocation(location: receivedMapLocation)
         
     }
@@ -89,9 +86,6 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         }
         
         do {
-            print("imageID: \(imageItem.id)")
-            print("imageURL: \(imageItem.url)")
-            
             let url = try convertStringToURL(string: imageItem.url)
             downloadImageFromFlikrURL(url: url, completionHandler: {
                 (data, response, error) in
