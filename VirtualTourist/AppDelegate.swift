@@ -16,17 +16,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var coreDataStack = CoreDataStack()
     
     // Starting location
-    let latitude = "43.7615"
-    let longitude = "-70.3553"
+//    let latitude = "43.7615"
+//    let longitude = "-70.3553"
     
     func checkIfFirstLaunch() {
         if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore") != true) {
             UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
-            UserDefaults.standard.setValuesForKeys(["latitude": latitude, "longitude": longitude])
-            UserDefaults.standard.synchronize()
-            print("First Launch")
+//            UserDefaults.standard.setValuesForKeys(["latitude": latitude, "longitude": longitude])
+//            UserDefaults.standard.synchronize()
+//            print("First Launch")
         } else {
-            print("Not First Launch")
+            // print("Not First Launch")
         }
     }
 

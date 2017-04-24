@@ -12,7 +12,6 @@ import MapKit
 class MapViewController: UIViewController, MKMapViewDelegate {
     
     // Fields
-    var previousLocation: CLLocationCoordinate2D?
     var lastLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
     var doDeletePins = false
@@ -64,9 +63,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         longPressRecognizer.isEnabled = true
         mapView.addGestureRecognizer(longPressRecognizer)
         
-        // Check UserDefaults for previous location
-        checkForPreviousMapLocation()
-        
         // Set starting location
         setMapViewLocation()
         
@@ -79,12 +75,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // dropTestPin()
         mapView.showsUserLocation = true
     }
-
-    func checkForPreviousMapLocation() {
-        let previousLatitude = UserDefaults.standard.double(forKey: "latitude")
-        let previousLongitude = UserDefaults.standard.double(forKey: "longitude")
-        
-        previousLocation = CLLocationCoordinate2DMake(previousLatitude, previousLongitude)
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        saveLocationToUserDefaults(location: mapView.centerCoordinate)
+    }
+    
+    func saveLocationToUserDefaults(location: CLLocationCoordinate2D) {
+        UserDefaults.standard.setValuesForKeys(["latitude": location.latitude])
+        UserDefaults.standard.setValuesForKeys(["longitude": location.longitude])
+        UserDefaults.standard.synchronize()
     }
     
     // Configure mapView
@@ -106,10 +105,23 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func setMapViewLocation() {
         let regionRadius: CLLocationDistance = 15000
-        
-        let coordinateRegion = MKCoordinateRegionMakeWithDistance(previousLocation!, regionRadius, regionRadius)
-        
-        mapView.setRegion(coordinateRegion, animated: true)
+        let previousLocation: CLLocationCoordinate2D? = {
+            
+            guard let lat = UserDefaults.standard.object(forKey: "latitude") as? CLLocationDegrees else {
+                // do something
+                return nil
+            }
+            guard let long = UserDefaults.standard.object(forKey: "longitude") as? CLLocationDegrees else {
+                // do something
+                return nil
+            }
+            return CLLocationCoordinate2D(latitude: lat, longitude: long)
+        }()
+    
+        if let location = previousLocation {
+            let coordinateRegion = MKCoordinateRegionMakeWithDistance(location, regionRadius, regionRadius)
+            mapView.setRegion(coordinateRegion, animated: true)
+        }
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
@@ -260,5 +272,11 @@ extension MapViewController {
         
         navigationItem.backBarButtonItem = backItem
         navigationController?.pushViewController(controller, animated: true)
+    }
+}
+
+extension MapViewController {
+    enum MapViewControllerError: Error {
+        case previousLocationMissing
     }
 }

@@ -36,7 +36,6 @@ class DetailViewController: UIViewController {
         setMapViewLocation(location: receivedMapLocation)
         
     }
-
 }
 
 extension DetailViewController: MKMapViewDelegate {
