@@ -80,6 +80,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         saveLocationToUserDefaults(location: mapView.centerCoordinate)
     }
     
+    // todo: not working
+    func mapView(_ mapView: MKMapView, didChange mode: MKUserTrackingMode, animated: Bool) {
+        saveLocationToUserDefaults(location: mapView.centerCoordinate)
+    }
+    
     func saveLocationToUserDefaults(location: CLLocationCoordinate2D) {
         UserDefaults.standard.setValuesForKeys(["latitude": location.latitude])
         UserDefaults.standard.setValuesForKeys(["longitude": location.longitude])
