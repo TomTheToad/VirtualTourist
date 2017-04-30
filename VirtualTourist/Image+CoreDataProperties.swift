@@ -2,7 +2,7 @@
 //  Image+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by VICTOR ASSELTA on 4/18/17.
+//  Created by VICTOR ASSELTA on 4/29/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
 

@@ -8,6 +8,7 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate {
     
@@ -15,6 +16,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     var lastLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
     var doDeletePins = false
+    
+    let coreData: CoreDataStack = {
+        return AppDelegate().coreDataStack
+    }()
+    let managedObjectContext: NSManagedObjectContext = {
+        return AppDelegate().coreDataStack.managedObjectContext
+    }()
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -64,7 +72,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.addGestureRecognizer(longPressRecognizer)
         
         // Set starting location
-        setMapViewLocation()
+        setMapViewLocationUserDefaults()
         
         // Configure core location
         locationManager.delegate = self
@@ -73,22 +81,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Test functions below
         // dropTestPin()
-        mapView.showsUserLocation = true
+        // mapView.showsUserLocation = true
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        // saveLocationToCoreData(location: mapView.centerCoordinate)
         saveLocationToUserDefaults(location: mapView.centerCoordinate)
-    }
-    
-    // todo: not working
-    func mapView(_ mapView: MKMapView, didChange mode: MKUserTrackingMode, animated: Bool) {
-        saveLocationToUserDefaults(location: mapView.centerCoordinate)
-    }
-    
-    func saveLocationToUserDefaults(location: CLLocationCoordinate2D) {
-        UserDefaults.standard.setValuesForKeys(["latitude": location.latitude])
-        UserDefaults.standard.setValuesForKeys(["longitude": location.longitude])
-        UserDefaults.standard.synchronize()
+        print("MESSAGE: mapView region did change")
     }
     
     // Configure mapView
@@ -108,7 +107,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         return pinView
     }
     
-    func setMapViewLocation() {
+    func setMapViewLocationUserDefaults() {
         let regionRadius: CLLocationDistance = 15000
         let previousLocation: CLLocationCoordinate2D? = {
             
@@ -134,7 +133,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             mapView.removeAnnotation(view.annotation!)
         } else {
             lastLocation = view.annotation?.coordinate
-            presentCollectionView()
+            presentDetailView()
         }
     }
 }
@@ -231,10 +230,8 @@ extension MapViewController {
                 print("ERROR: \(error.localizedDescription)")
             } else {
                 if let images = imageItems {
-                    print("DetailView received ids: \(images)")
                     DispatchQueue.main.async(execute: { ()-> Void in
-                        self.presentCollectionView(location: self.lastLocation!, imageItems: images)
-                        print("lastLocation: \(self.lastLocation!)")
+                        self.presentDetailView(location: self.lastLocation!, imageItems: images)
                     })
                 } else {
                     print("ERROR: missing returned urls")
@@ -242,12 +239,29 @@ extension MapViewController {
             }
         }
     }
+    
+    func saveLocationToCoreData(location: CLLocationCoordinate2D) {
+        print("A")
+        let entity = NSEntityDescription.entity(forEntityName: "LastLocation", in: managedObjectContext)
+        print("B")
+        let lastLocation = LastLocation(entity: entity!, insertInto: managedObjectContext) as LastLocation
+        print("C")
+        lastLocation.latitude = location.latitude
+        lastLocation.longitude = location.longitude
+        print("D")
+        do {
+            try coreData.saveMainContext()
+            print("E")
+        } catch {
+            print("Warning: Unable to save to core data.")
+        }
+    }
 }
 
 extension MapViewController {
     
     // Collection View
-    func presentCollectionView() {
+    func presentDetailView() {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
@@ -262,12 +276,11 @@ extension MapViewController {
         navigationController?.pushViewController(controller, animated: true)
     }
     
-    func presentCollectionView(location: CLLocationCoordinate2D, imageItems: [ImageItem]) {
+    func presentDetailView(location: CLLocationCoordinate2D, imageItems: [ImageItem]) {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
         }
-        
         
         controller.receivedMapLocation = location
         controller.receivedImages = imageItems
@@ -277,6 +290,14 @@ extension MapViewController {
         
         navigationItem.backBarButtonItem = backItem
         navigationController?.pushViewController(controller, animated: true)
+    }
+}
+
+extension MapViewController {
+    func saveLocationToUserDefaults(location: CLLocationCoordinate2D) {
+        UserDefaults.standard.setValuesForKeys(["latitude": location.latitude])
+        UserDefaults.standard.setValuesForKeys(["longitude": location.longitude])
+        UserDefaults.standard.synchronize()
     }
 }
 

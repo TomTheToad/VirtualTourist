@@ -57,7 +57,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         
-        // todo: save location before app terminates.
+        do {
+            try coreDataStack.saveMainContext()
+        } catch {
+            print("Warning: Failed to save ManagedObjectContext")
+        }
     }
 
 
