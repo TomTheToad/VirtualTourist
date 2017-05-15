@@ -14,7 +14,7 @@ class FlickrAPIController {
     // Fields
     let responseCheck = URLResponseCheck()
     let managedObjectContext: NSManagedObjectContext = {
-        return AppDelegate().coreDataStack.managedObjectContext
+        return AppDelegate().persistentContainer.viewContext
     }()
     
     // Flickr application key
@@ -42,7 +42,7 @@ class FlickrAPIController {
     // lat, lon, radius, accuracy, safe_search, unit, radius_units, page, per_page
     // return a dictionary
      
-    func getImageArray(latitude: String, longitude: String, completionHander: @escaping (Error?, [ImageItem]?) -> Void) throws {
+    func getImageArray(latitude: String, longitude: String, completionHander: @escaping (Error?, [NSDictionary]?) -> Void) throws {
         
         let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&page=1&per_page=21"
         
@@ -87,8 +87,8 @@ class FlickrAPIController {
             do {
                 let photosDict = try self.ParseJSONToNSDict(JSONData: thisData)
                 // change here
-                let images = try self.FlickrDictToImageArray(dictionary: photosDict)
-                completionHander(nil, images)
+                // let images = try self.FlickrDictToImageArray(dictionary: photosDict)
+                completionHander(nil, photosDict)
             } catch {
                 completionHander(FlickrErrors.JSONParseError, nil)
             }
@@ -115,26 +115,6 @@ class FlickrAPIController {
             throw FlickrErrors.JSONParseError
         }
 
-    }
-    
-    // keep
-    func FlickrDictToImageArray(dictionary: [NSDictionary]) throws -> [ImageItem] {
-        var imagesItems = [ImageItem]()
-        
-        for image in dictionary {
-            
-            if let farmID = image.value(forKey: "farm"),
-                let serverID = image.value(forKey: "server"),
-                let secret = image.value(forKey: "secret"),
-                let id = image.value(forKey: "id") as? String {
-                let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
-                let imageItem = ImageItem(id: id, url: url)
-                imagesItems.append(imageItem)
-            } else {
-                throw FlickrErrors.JSONParseError
-            }
-        }
-        return imagesItems
     }
 
         /*

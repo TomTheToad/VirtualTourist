@@ -14,10 +14,9 @@ class DetailViewController: UIViewController {
     
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
-    var receivedImages: [ImageItem]?
-    let coreData: CoreDataStack = {
-        return AppDelegate().coreDataStack
-    }()
+    var album: Album?
+    
+    let coreData = CoreDataController()
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -32,9 +31,18 @@ class DetailViewController: UIViewController {
         // Configure collectionView
         collectionView!.delegate = self
         collectionView!.dataSource = self
+        
+        // todo: handle missing coordinate?
+        album = {
+           coreData.fetchAlbum(location: receivedMapLocation!)
+        }()
+        
+        if album?.hasImages?.array.isEmpty == true {
+            // get images from Flickr
+            getImages(mapLocation: receivedMapLocation!)
+        }
 
         setMapViewLocation(location: receivedMapLocation)
-        
     }
 }
 
@@ -63,7 +71,7 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 21
+        return (album?.hasImages?.count)!
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -78,46 +86,42 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
         cell.backgroundColor = .blue
         
-        guard let imageItem = receivedImages?[(indexPath as NSIndexPath).row] else {
-            print("ERROR: NO id received")
-            cell.textLabel!.text = "broken image"
+        guard let imageURLS = album?.mutableOrderedSetValue(forKey: "url") else {
+            // todo: handle error
             return cell
         }
         
-        do {
-            let url = try convertStringToURL(string: imageItem.url)
-            downloadImageFromFlikrURL(url: url, completionHandler: {
-                (data, response, error) in
-                
-                if error == nil {
-                    // todo: check for data
-                    DispatchQueue.main.async(execute: { ()-> Void in
-                        // thisImageView.image = UIImage(data: data!)
-                        cell.imageView.image = UIImage(data: data!)
-                        cell.activityIndicator.stopAnimating()
-                    })
-                } else {
-                    guard let thisResponse = response else {
-                        print("DV: No response")
-                        return
-                    }
-                    
-                    print("Response: \(thisResponse)")
-                    
-                    guard let thisError = error else {
-                        print("Error: No error")
-                        return
-                    }
-                    
-                    print("Error: \(thisError)")
+        let url = imageURLS[(indexPath as NSIndexPath).row] as! URL
+        downloadImageFromFlikrURL(url: url, completionHandler: {
+            (data, response, error) in
+            
+            if error == nil {
+                // todo: check for data
+                let image = UIImage(data: data!)
+                DispatchQueue.main.async(execute: { ()-> Void in
+                    // thisImageView.image = UIImage(data: data!)
+                    cell.imageView.image = image
+                    cell.activityIndicator.stopAnimating()
+                })
+            } else {
+                guard let thisResponse = response else {
+                    print("DV: No response")
+                    return
                 }
                 
-            })
-        } catch {
-            cell.textLabel!.text = "broken image"
-        }
-        
-        return cell
+                print("Response: \(thisResponse)")
+                
+                guard let thisError = error else {
+                    print("Error: No error")
+                    return
+                }
+                
+                print("Error: \(thisError)")
+            }
+            
+        })
+    
+    return cell
     }
 }
 
@@ -177,8 +181,60 @@ extension DetailViewController {
 }
 
 extension DetailViewController {
+    
+    // FLICKRAPI
+    
+    func getImages(mapLocation: CLLocationCoordinate2D) {
+        // Get images
+        // todo: will probably need to update the api to use
+        // a fetchedResultsController
+        
+        let latitude: String = (mapLocation.latitude.description)
+        print("latitude: \(latitude)")
+        let longitude: String = (mapLocation.longitude.description)
+        print("longitude: \(longitude)")
+        
+        let flickr = FlickrAPIController()
+        
+        do {
+            try flickr.getImageArray(latitude: latitude, longitude: longitude, completionHander: getImagesCompletionHandler)
+        } catch {
+            // todo: Handle error
+            print("ERROR: Something Happened")
+        }
+    }
+    
+    func getImagesCompletionHandler(error: Error?, imageItems: [NSDictionary]?) -> Void {
+        if error == nil {
+            // handle error
+            if let error = error {
+                print("ERROR: \(error.localizedDescription)")
+                // handle error, send alert
+            } else {
+                if let images = imageItems {
+                    DispatchQueue.main.async(execute: { ()-> Void in
+                        self.populateAlbum(dictionary: images)
+                    })
+                } else {
+                    print("ERROR: missing returned urls")
+                    // handle error, send alert
+                }
+            }
+        }
+    }
+    
+    func populateAlbum(dictionary: [NSDictionary]) {
+        for item in dictionary {
+            let image = coreData.fetchImageEntity()
+            image.id = item.value(forKey: "id") as? String
+        }
+    }
+}
+
+extension DetailViewController {
     enum DetailViewControllerErrors: Error {
         case failedToConvertToURL
         case ImageDataMissing
+        case URLDataMissing
     }
 }

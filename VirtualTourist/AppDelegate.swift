@@ -7,19 +7,29 @@
 //
 
 import UIKit
+import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     
-    var coreDataStack = CoreDataStack()
-    
-    // Starting location
-//    let latitude = "43.7615"
-//    let longitude = "-70.3553"
+    // Updated Core Data Boiler Plate
+    // Removed from own class
+    // todo: See apple documentation to determine
+    // appropriate location for persistentContainer
+    lazy var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "VirtualTourist")
+        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        })
+        return container
+    }()
     
     func checkIfFirstLaunch() {
+        // todo: is this necessary?
         if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore") != true) {
             UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
 //            UserDefaults.standard.setValuesForKeys(["latitude": latitude, "longitude": longitude])
@@ -55,15 +65,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-        
         do {
-            try coreDataStack.saveMainContext()
+            try persistentContainer.viewContext.save()
         } catch {
-            print("Warning: Failed to save ManagedObjectContext")
+            print("ERROR: Unable to save data")
         }
     }
-
 
 }
 

@@ -17,11 +17,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     var locationManager = CLLocationManager()
     var doDeletePins = false
     
-    let coreData: CoreDataStack = {
-        return AppDelegate().coreDataStack
-    }()
     let managedObjectContext: NSManagedObjectContext = {
-        return AppDelegate().coreDataStack.managedObjectContext
+        return AppDelegate().persistentContainer.viewContext
     }()
     
     // IBOutlets
@@ -31,30 +28,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Configure navigationView
         navigationItem.title = "Virtual Tourist"
-        
-        let editButton = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(ShowToolBar(sender:)))
-
-        navigationItem.rightBarButtonItem = editButton
-        
-        let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let toolBarButtonLabel = UIBarButtonItem(title: "Select Pins to Delete", style: .plain, target: self, action: nil)
-        toolBarButtonLabel.tintColor = UIColor.white
-        
-        navigationController?.toolbar.barTintColor = UIColor.red
-        toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
+        addToolBar()
         
         // Clears selected pin(s)
         deselectAllPins()
-    }
-    
-    func ShowToolBar(sender: UIBarButtonItem) {
-        if navigationController?.toolbar.isHidden != false {
-            navigationController?.setToolbarHidden(false, animated: true)
-            doDeletePins = true
-        } else {
-            navigationController?.setToolbarHidden(true, animated: true)
-            doDeletePins = false
-        }
     }
     
     override func viewDidLoad() {
@@ -84,6 +61,31 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // mapView.showsUserLocation = true
     }
     
+    /*** UI ***/
+    func addToolBar() {
+        let editButton = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(ShowToolBar(sender:)))
+        
+        navigationItem.rightBarButtonItem = editButton
+        
+        let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let toolBarButtonLabel = UIBarButtonItem(title: "Select Pins to Delete", style: .plain, target: self, action: nil)
+        toolBarButtonLabel.tintColor = UIColor.white
+        
+        navigationController?.toolbar.barTintColor = UIColor.red
+        toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
+    }
+    
+    func ShowToolBar(sender: UIBarButtonItem) {
+        if navigationController?.toolbar.isHidden != false {
+            navigationController?.setToolbarHidden(false, animated: true)
+            doDeletePins = true
+        } else {
+            navigationController?.setToolbarHidden(true, animated: true)
+            doDeletePins = false
+        }
+    }
+    
+    /*** MapView ***/
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         // saveLocationToCoreData(location: mapView.centerCoordinate)
         saveLocationToUserDefaults(location: mapView.centerCoordinate)
@@ -129,49 +131,18 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        if doDeletePins == true {
-            mapView.removeAnnotation(view.annotation!)
-        } else {
-            lastLocation = view.annotation?.coordinate
-            presentDetailView()
+        guard let location = view.annotation?.coordinate else {
+            // coord missing
+            // todo: handle error
+            return
         }
+        
+        presentDetailView(location: location)
     }
 }
 
 
 extension MapViewController: CLLocationManagerDelegate {
-    
-//    func addAnnotation(gestureRecognizer:UIGestureRecognizer){
-//        if gestureRecognizer.state == UIGestureRecognizerState.Began {
-//            var touchPoint = gestureRecognizer.locationInView(map)
-//            var newCoordinates = map.convertPoint(touchPoint, toCoordinateFromView: map)
-//            let annotation = MKPointAnnotation()
-//            annotation.coordinate = newCoordinates
-//            
-//            CLGeocoder().reverseGeocodeLocation(CLLocation(latitude: newCoordinates.latitude, longitude: newCoordinates.longitude), completionHandler: {(placemarks, error) -> Void in
-//                if error != nil {
-//                    println("Reverse geocoder failed with error" + error.localizedDescription)
-//                    return
-//                }
-//                
-//                if placemarks.count > 0 {
-//                    let pm = placemarks[0] as! CLPlacemark
-//                    
-//                    // not all places have thoroughfare & subThoroughfare so validate those values
-//                    annotation.title = pm.thoroughfare + ", " + pm.subThoroughfare
-//                    annotation.subtitle = pm.subLocality
-//                    self.map.addAnnotation(annotation)
-//                    println(pm)
-//                }
-//                else {
-//                    annotation.title = "Unknown Place"
-//                    self.map.addAnnotation(annotation)
-//                    println("Problem with the data received from geocoder")
-//                }
-//                places.append(["name":annotation.title,"latitude":"\(newCoordinates.latitude)","longitude":"\(newCoordinates.longitude)"])
-//            })
-//        }
-//    }
     
     // todo: change method to touch and another to add
     func addAnnotation(_ gestureRecognizer: UIGestureRecognizer) {
@@ -182,7 +153,7 @@ extension MapViewController: CLLocationManagerDelegate {
             annotation.coordinate = newCoords
             annotation.title = "User Added Point"
             mapView.addAnnotation(annotation)
-            getImages(mapLocation: newCoords)
+            presentDetailView(location: newCoords)
         }
     }
     
@@ -196,94 +167,16 @@ extension MapViewController: CLLocationManagerDelegate {
     }
 }
 
-extension MapViewController {
-    
-    // Fields
-    // var receivedMapLocation: CLLocationCoordinate2D?
-    
-    func getImages(mapLocation: CLLocationCoordinate2D) {
-        // Get images
-        // todo: will probably need to update the api to use
-        // a fetchedResultsController
-        
-        let latitude: String = (mapLocation.latitude.description)
-        print("latitude: \(latitude)")
-        let longitude: String = (mapLocation.longitude.description)
-        print("longitude: \(longitude)")
-        
-        lastLocation = mapLocation
-        
-        let flickr = FlickrAPIController()
-        
-        do {
-            try flickr.getImageArray(latitude: latitude, longitude: longitude, completionHander: getImagesCompletionHandler)
-        } catch {
-            // Handle error
-            print("ERROR: Something Happened")
-        }
-    }
-    
-    func getImagesCompletionHandler(error: Error?, imageItems: [ImageItem]?) -> Void {
-        if error == nil {
-            // handle error
-            if let error = error {
-                print("ERROR: \(error.localizedDescription)")
-            } else {
-                if let images = imageItems {
-                    DispatchQueue.main.async(execute: { ()-> Void in
-                        self.presentDetailView(location: self.lastLocation!, imageItems: images)
-                    })
-                } else {
-                    print("ERROR: missing returned urls")
-                }
-            }
-        }
-    }
-    
-    func saveLocationToCoreData(location: CLLocationCoordinate2D) {
-        print("A")
-        let entity = NSEntityDescription.entity(forEntityName: "LastLocation", in: managedObjectContext)
-        print("B")
-        let lastLocation = LastLocation(entity: entity!, insertInto: managedObjectContext) as LastLocation
-        print("C")
-        lastLocation.latitude = location.latitude
-        lastLocation.longitude = location.longitude
-        print("D")
-        do {
-            try coreData.saveMainContext()
-            print("E")
-        } catch {
-            print("Warning: Unable to save to core data.")
-        }
-    }
-}
 
 extension MapViewController {
     
-    // Collection View
-    func presentDetailView() {
-        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
-            print("MESSAGE: Failed to instantiate collection view controller")
-            return
-        }
-        
-        controller.receivedMapLocation = lastLocation!
-        
-        let backItem = UIBarButtonItem()
-        backItem.title = "OK"
-        
-        navigationItem.backBarButtonItem = backItem
-        navigationController?.pushViewController(controller, animated: true)
-    }
-    
-    func presentDetailView(location: CLLocationCoordinate2D, imageItems: [ImageItem]) {
+    func presentDetailView(location: CLLocationCoordinate2D) {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
         }
         
         controller.receivedMapLocation = location
-        controller.receivedImages = imageItems
         
         let backItem = UIBarButtonItem()
         backItem.title = "OK"
