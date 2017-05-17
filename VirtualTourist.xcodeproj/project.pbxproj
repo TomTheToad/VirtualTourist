@@ -38,10 +38,10 @@
 		C7B77A181E5251B600755DF7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C7B77A1B1E5251B600755DF7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C7B77A1D1E5251B600755DF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C7B7A1701EB57F79000BB032 /* Album+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Album+CoreDataClass.swift"; path = "VirtualTourist/Album+CoreDataClass.swift"; sourceTree = "<group>"; };
-		C7B7A1711EB57F79000BB032 /* Album+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Album+CoreDataProperties.swift"; path = "VirtualTourist/Album+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C7B7A1721EB57F79000BB032 /* Image+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Image+CoreDataClass.swift"; path = "VirtualTourist/Image+CoreDataClass.swift"; sourceTree = "<group>"; };
-		C7B7A1731EB57F79000BB032 /* Image+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Image+CoreDataProperties.swift"; path = "VirtualTourist/Image+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C7B7A1701EB57F79000BB032 /* Album+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Album+CoreDataClass.swift"; sourceTree = "<group>"; };
+		C7B7A1711EB57F79000BB032 /* Album+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Album+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C7B7A1721EB57F79000BB032 /* Image+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Image+CoreDataClass.swift"; sourceTree = "<group>"; };
+		C7B7A1731EB57F79000BB032 /* Image+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Image+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C7B9B9811EC9190500053814 /* CoreDataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataController.swift; sourceTree = "<group>"; };
 		C7BD58EC1E65F684000F85A1 /* FlickrPhotoParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlickrPhotoParameters.swift; sourceTree = "<group>"; };
 		C7E415ED1E53CE6700A120F4 /* VirtualTourist.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = VirtualTourist.xcdatamodel; sourceTree = "<group>"; };
@@ -72,10 +72,6 @@
 		C7B77A051E5251AA00755DF7 = {
 			isa = PBXGroup;
 			children = (
-				C7B7A1701EB57F79000BB032 /* Album+CoreDataClass.swift */,
-				C7B7A1711EB57F79000BB032 /* Album+CoreDataProperties.swift */,
-				C7B7A1721EB57F79000BB032 /* Image+CoreDataClass.swift */,
-				C7B7A1731EB57F79000BB032 /* Image+CoreDataProperties.swift */,
 				C7B77A101E5251AA00755DF7 /* VirtualTourist */,
 				C7B77A0F1E5251AA00755DF7 /* Products */,
 			);
@@ -104,6 +100,10 @@
 		C7B77A231E52529D00755DF7 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				C7B7A1701EB57F79000BB032 /* Album+CoreDataClass.swift */,
+				C7B7A1711EB57F79000BB032 /* Album+CoreDataProperties.swift */,
+				C7B7A1721EB57F79000BB032 /* Image+CoreDataClass.swift */,
+				C7B7A1731EB57F79000BB032 /* Image+CoreDataProperties.swift */,
 				C7E415EC1E53CE6700A120F4 /* VirtualTourist.xcdatamodeld */,
 				C7BD58EC1E65F684000F85A1 /* FlickrPhotoParameters.swift */,
 				C7EEBF431E6AEC9200309BA8 /* sampleJSONData.rtf */,

@@ -5,6 +5,7 @@
 //  Created by VICTOR ASSELTA on 5/14/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
+// todo: Add robust error handling and custom errors
 
 import Foundation
 import CoreData
@@ -35,15 +36,18 @@ class CoreDataController {
     }
     
     func fetchImageEntity() -> Image {
-        return Image(entity: Image.entity(), insertInto: managedObectContext)
+        let entity = NSEntityDescription.entity(forEntityName: "Image", in: managedObectContext)!
+        return Image(entity: entity, insertInto: managedObectContext)
     }
     
     func fetchAlbumEntity() -> Album {
-        return Album(entity: Album.entity(), insertInto: managedObectContext)
+        let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObectContext)!
+        return Album(entity: entity, insertInto: managedObectContext)
     }
     
     func converNSDictToAlbum(dictionary: [NSDictionary]) -> Album {
-        let album = Album(entity: Album.entity(), insertInto: managedObectContext)
+        let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObectContext)!
+        let album = Album(entity: entity, insertInto: managedObectContext)
         
         for item in dictionary {
             let image = fetchImageEntity()

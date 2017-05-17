@@ -272,9 +272,7 @@ extension MapViewController {
         let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObjectContext)!
         
         let album = Album(entity: entity, insertInto: managedObjectContext)
-        
         let lat = lastLocation?.latitude
-        
         let long = lastLocation?.longitude
         
         album.latitude = lat!

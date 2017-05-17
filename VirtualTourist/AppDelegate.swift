@@ -28,21 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return container
     }()
     
-    func checkIfFirstLaunch() {
-        // todo: is this necessary?
-        if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore") != true) {
-            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
-//            UserDefaults.standard.setValuesForKeys(["latitude": latitude, "longitude": longitude])
-//            UserDefaults.standard.synchronize()
-//            print("First Launch")
-        } else {
-            // print("Not First Launch")
-        }
-    }
-
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        checkIfFirstLaunch()
         return true
     }
 

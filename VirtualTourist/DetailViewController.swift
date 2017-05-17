@@ -39,9 +39,9 @@ class DetailViewController: UIViewController {
         collectionView!.delegate = self
         collectionView!.dataSource = self
 
-        
         setMapViewLocation(location: receivedMapLocation)
     }
+    
 }
 
 extension DetailViewController: MKMapViewDelegate {
@@ -88,7 +88,6 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         let images = receivedalbum?.hasImages?.array as! [Image]
         
         let image = images[(indexPath as NSIndexPath).row]
-        print("url: \(String(describing: image.url))")
         let url = URL(string: image.url!)
         
         downloadImageFromFlikrURL(url: url!, completionHandler: {
