@@ -14,9 +14,16 @@ class DetailViewController: UIViewController {
     
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
-    var album: Album?
+    var receivedalbum: Album?
     
     let coreData = CoreDataController()
+    let managedObjectContext: NSManagedObjectContext = {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            fatalError("Internal application error")
+        }
+        return appDelegate.persistentContainer.viewContext
+    }()
+    
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -31,17 +38,8 @@ class DetailViewController: UIViewController {
         // Configure collectionView
         collectionView!.delegate = self
         collectionView!.dataSource = self
-        
-        // todo: handle missing coordinate?
-        album = {
-           coreData.fetchAlbum(location: receivedMapLocation!)
-        }()
-        
-        if album?.hasImages?.array.isEmpty == true {
-            // get images from Flickr
-            getImages(mapLocation: receivedMapLocation!)
-        }
 
+        
         setMapViewLocation(location: receivedMapLocation)
     }
 }
@@ -71,7 +69,8 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return (album?.hasImages?.count)!
+//        return (album?.hasImages?.count)!
+        return 21
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -86,13 +85,13 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
         cell.backgroundColor = .blue
         
-        guard let imageURLS = album?.mutableOrderedSetValue(forKey: "url") else {
-            // todo: handle error
-            return cell
-        }
+        let images = receivedalbum?.hasImages?.array as! [Image]
         
-        let url = imageURLS[(indexPath as NSIndexPath).row] as! URL
-        downloadImageFromFlikrURL(url: url, completionHandler: {
+        let image = images[(indexPath as NSIndexPath).row]
+        print("url: \(String(describing: image.url))")
+        let url = URL(string: image.url!)
+        
+        downloadImageFromFlikrURL(url: url!, completionHandler: {
             (data, response, error) in
             
             if error == nil {
@@ -176,57 +175,6 @@ extension DetailViewController {
                     print("ERROR: missing returned urls")
                 }
             }
-        }
-    }
-}
-
-extension DetailViewController {
-    
-    // FLICKRAPI
-    
-    func getImages(mapLocation: CLLocationCoordinate2D) {
-        // Get images
-        // todo: will probably need to update the api to use
-        // a fetchedResultsController
-        
-        let latitude: String = (mapLocation.latitude.description)
-        print("latitude: \(latitude)")
-        let longitude: String = (mapLocation.longitude.description)
-        print("longitude: \(longitude)")
-        
-        let flickr = FlickrAPIController()
-        
-        do {
-            try flickr.getImageArray(latitude: latitude, longitude: longitude, completionHander: getImagesCompletionHandler)
-        } catch {
-            // todo: Handle error
-            print("ERROR: Something Happened")
-        }
-    }
-    
-    func getImagesCompletionHandler(error: Error?, imageItems: [NSDictionary]?) -> Void {
-        if error == nil {
-            // handle error
-            if let error = error {
-                print("ERROR: \(error.localizedDescription)")
-                // handle error, send alert
-            } else {
-                if let images = imageItems {
-                    DispatchQueue.main.async(execute: { ()-> Void in
-                        self.populateAlbum(dictionary: images)
-                    })
-                } else {
-                    print("ERROR: missing returned urls")
-                    // handle error, send alert
-                }
-            }
-        }
-    }
-    
-    func populateAlbum(dictionary: [NSDictionary]) {
-        for item in dictionary {
-            let image = coreData.fetchImageEntity()
-            image.id = item.value(forKey: "id") as? String
         }
     }
 }

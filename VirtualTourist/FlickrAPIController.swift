@@ -116,6 +116,25 @@ class FlickrAPIController {
         }
 
     }
+    
+//    func FlickrDictToImageArray(dictionary: [NSDictionary]) throws -> [Image] {
+//        var imagesItems = [Image]()
+//        
+//        for image in dictionary {
+//            
+//            if let farmID = image.value(forKey: "farm"),
+//                let serverID = image.value(forKey: "server"),
+//                let secret = image.value(forKey: "secret"),
+//                let id = image.value(forKey: "id") as? String {
+//                let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
+//                let imageItem = ImageItem(id: id, url: url)
+//                imagesItems.append(imageItem)
+//            } else {
+//                throw FlickrErrors.JSONParseError
+//            }
+//        }
+//        return imagesItems
+//    }
 
         /*
         https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
