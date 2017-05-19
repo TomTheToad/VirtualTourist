@@ -33,6 +33,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Clears selected pin(s)
         deselectAllPins()
+        
+        // Preload pins
+        addAnnotationsFromMemory()
     }
     
     override func viewDidLoad() {
@@ -175,6 +178,19 @@ extension MapViewController: CLLocationManagerDelegate {
             
             mapView.addAnnotation(annotation)
             getImages(mapLocation: newCoords)
+        }
+    }
+    
+    func addAnnotationsFromMemory() {
+        do {
+            let albums = try managedObjectContext.fetch(Album.fetchRequest()) as [Album]
+            for album in albums {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = (CLLocationCoordinate2DMake(album.latitude, album.longitude))
+                mapView.addAnnotation(annotation)
+            }
+        } catch {
+            print("Warning: unable to load map pin location!")
         }
     }
     

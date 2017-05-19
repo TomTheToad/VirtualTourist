@@ -42,6 +42,14 @@ class DetailViewController: UIViewController {
         setMapViewLocation(location: receivedMapLocation)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        do {
+            try managedObjectContext.save()
+        } catch {
+            print("Warning: Unable to save data!")
+        }
+    }
+    
 }
 
 extension DetailViewController: MKMapViewDelegate {
