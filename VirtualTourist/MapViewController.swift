@@ -111,17 +111,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        
         guard let location = view.annotation?.coordinate else {
             // coord missing
             // todo: handle error
             return
         }
         
-//        guard let album = coreData.fetchAlbum(location: location) else {
-//            // throw error
-//            print(MapViewControllerError.previousLocationMissing)
-//            return
-//        }
         let predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", argumentArray: [location.latitude, location.longitude])
         
         let request = NSFetchRequest<Album>(entityName: "Album")
@@ -132,11 +128,33 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 print("Failed")
                 return
             }
+            if doDeletePins != true {
                 DispatchQueue.main.async(execute: { ()-> Void in
-                self.presentDetailView(location: location, album: album)
-            })
+                    self.presentDetailView(location: location, album: album)
+                })
+            } else {
+                guard let annotation = view.annotation else {
+                    print("Warning: Cannot delete view. View not found")
+                    return
+                }
+                
+                managedObjectContext.delete(album)
+                saveData()
+                mapView.removeAnnotation(annotation)
+                print("Album deleted")
+                
+            }
         } catch {
             print("Fetch request failed!")
+        }
+    }
+    
+    // todo: migrate to CoreDataController
+    func saveData() {
+        do {
+            try managedObjectContext.save()
+        } catch {
+            print("Warning: Unable to save data!")
         }
     }
     
@@ -175,7 +193,6 @@ extension MapViewController: CLLocationManagerDelegate {
             annotation.title = "User Added Point"
             
             lastLocation = newCoords
-            
             mapView.addAnnotation(annotation)
             getImages(mapLocation: newCoords)
         }
@@ -187,11 +204,27 @@ extension MapViewController: CLLocationManagerDelegate {
             for album in albums {
                 let annotation = MKPointAnnotation()
                 annotation.coordinate = (CLLocationCoordinate2DMake(album.latitude, album.longitude))
-                mapView.addAnnotation(annotation)
+                if doesMapViewContainAnnotation(annotation: annotation) != true {
+                    mapView.addAnnotation(annotation)
+                }
             }
         } catch {
             print("Warning: unable to load map pin location!")
         }
+    }
+    
+    func doesMapViewContainAnnotation(annotation: MKAnnotation) -> Bool {
+        if mapView.annotations.isEmpty {
+            return false
+        }
+        
+        for item in mapView.annotations {
+            if item.coordinate.latitude == annotation.coordinate.latitude, item.coordinate.longitude == annotation.coordinate.longitude {
+                return true
+            }
+        }
+        
+        return false
     }
     
     // helper
