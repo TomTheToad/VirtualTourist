@@ -86,7 +86,6 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         cell.backgroundColor = .blue
         
         let images = receivedalbum?.hasImages?.array as! [Image]
-        
         let image = images[(indexPath as NSIndexPath).row]
         let url = URL(string: image.url!)
         
@@ -97,7 +96,6 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
                 // todo: check for data
                 let image = UIImage(data: data!)
                 DispatchQueue.main.async(execute: { ()-> Void in
-                    // thisImageView.image = UIImage(data: data!)
                     cell.imageView.image = image
                     cell.activityIndicator.stopAnimating()
                 })
@@ -141,26 +139,6 @@ extension DetailViewController {
             completionHandler(data, response, error)
         }).resume()
     }
-    
-//    func getLocationImageIDs() {
-//        // Get images
-//        // todo: will probably need to update the api to use
-//        // a fetchedResultsController
-//        
-//        let latitude: String = (receivedMapLocation?.latitude.description)!
-//        print("latitude: \(latitude)")
-//        let longitude: String = (receivedMapLocation?.longitude.description)!
-//        print("longitude: \(longitude)")
-//        
-//        let flickr = FlickrAPIController()
-//        
-//        do {
-//            try flickr.getPhotosIDList(latitude: latitude, longitude: longitude, completionHander: getLocationImagesCompletionHandler)
-//        } catch {
-//            // Handle error
-//            print("ERROR: Something Happened")
-//        }
-//    }
     
     func getLocationImagesCompletionHandler(error: Error?, urls: [String]?) -> Void {
         if error == nil {
