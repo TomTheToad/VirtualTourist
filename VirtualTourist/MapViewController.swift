@@ -16,11 +16,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     var lastLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
     var doDeletePins = false
-    
-    let managedObjectContext: NSManagedObjectContext = {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        return appDelegate.persistentContainer.viewContext
-    }()
+    let coreData = CoreDataController()
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -45,7 +41,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.delegate = self
         mapView.mapType = .standard
         mapView.isRotateEnabled = false
-        
         
         // Gesture Recognizer
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addAnnotation(_:)))
@@ -86,6 +81,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
+    func HideToolBar() {
+        navigationController?.setToolbarHidden(true, animated: false)
+        doDeletePins = false
+    }
+    
     /*** MapView ***/
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         // saveLocationToCoreData(location: mapView.centerCoordinate)
@@ -113,48 +113,30 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
         guard let location = view.annotation?.coordinate else {
-            // coord missing
-            // todo: handle error
+            print("Location Missing")
             return
         }
         
-        let predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", argumentArray: [location.latitude, location.longitude])
+        guard let album = coreData.fetchAlbum(location: location) else {
+            print("Album not returned from coreData")
+            return
+        }
         
-        let request = NSFetchRequest<Album>(entityName: "Album")
-        request.predicate = predicate
-        
-        do {
-            guard let album = try managedObjectContext.fetch(request).last else {
-                print("Failed")
+        if doDeletePins == false {
+            DispatchQueue.main.async(execute: { ()-> Void in
+                self.presentDetailView(location: location, album: album)
+            })
+        } else {
+            guard let annotation = view.annotation else {
+                print("Warning: Cannot delete view. View not found")
                 return
             }
-            if doDeletePins != true {
-                DispatchQueue.main.async(execute: { ()-> Void in
-                    self.presentDetailView(location: location, album: album)
-                })
-            } else {
-                guard let annotation = view.annotation else {
-                    print("Warning: Cannot delete view. View not found")
-                    return
-                }
-                
-                managedObjectContext.delete(album)
-                saveData()
-                mapView.removeAnnotation(annotation)
-                print("Album deleted")
-                
-            }
-        } catch {
-            print("Fetch request failed!")
-        }
-    }
-    
-    // todo: migrate to CoreDataController
-    func saveData() {
-        do {
-            try managedObjectContext.save()
-        } catch {
-            print("Warning: Unable to save data!")
+
+            coreData.deleteAlbum(album: album)
+            coreData.saveChanges()
+            mapView.removeAnnotation(annotation)
+            print("Album deleted")
+            
         }
     }
     
@@ -186,6 +168,7 @@ extension MapViewController: CLLocationManagerDelegate {
     // todo: change method to touch and another to add
     func addAnnotation(_ gestureRecognizer: UIGestureRecognizer) {
         if gestureRecognizer.state == .began {
+            HideToolBar()
             let touchPoint = gestureRecognizer.location(in: mapView)
             let newCoords = mapView.convert(touchPoint, toCoordinateFrom: mapView)
             let annotation = MKPointAnnotation()
@@ -199,17 +182,19 @@ extension MapViewController: CLLocationManagerDelegate {
     }
     
     func addAnnotationsFromMemory() {
-        do {
-            let albums = try managedObjectContext.fetch(Album.fetchRequest()) as [Album]
-            for album in albums {
-                let annotation = MKPointAnnotation()
-                annotation.coordinate = (CLLocationCoordinate2DMake(album.latitude, album.longitude))
-                if doesMapViewContainAnnotation(annotation: annotation) != true {
-                    mapView.addAnnotation(annotation)
-                }
+
+        guard let albums = coreData.fetchAlbums() else {
+            // todo: throw an error
+            print("Warning: failed to load albums")
+            return
+        }
+        
+        for album in albums {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = (CLLocationCoordinate2DMake(album.latitude, album.longitude))
+            if doesMapViewContainAnnotation(annotation: annotation) == false {
+                mapView.addAnnotation(annotation)
             }
-        } catch {
-            print("Warning: unable to load map pin location!")
         }
     }
     
@@ -300,8 +285,9 @@ extension MapViewController {
                 print("ERROR: \(error.localizedDescription)")
                 // handle error, send alert
             } else {
+                // todo: Album never sets location
                 if let images = imageItems {
-                    let album = converNSDictToAlbum(dictionary: images)
+                    let album = coreData.convertNSDictToAlbum(dictionary: images, location: lastLocation!)
                     DispatchQueue.main.async(execute: { ()-> Void in
                         self.presentDetailView(location: self.lastLocation!, album: album)
                     })
@@ -315,34 +301,6 @@ extension MapViewController {
 
 }
 
-extension MapViewController {
-    
-    func converNSDictToAlbum(dictionary: [NSDictionary]) -> Album {
-        let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObjectContext)!
-        
-        let album = Album(entity: entity, insertInto: managedObjectContext)
-        let lat = lastLocation?.latitude
-        let long = lastLocation?.longitude
-        
-        album.latitude = lat!
-        album.longitude = long!
-        
-        for item in dictionary {
-            let entity = NSEntityDescription.entity(forEntityName: "Image", in: managedObjectContext)!
-            let image = Image(entity: entity, insertInto: managedObjectContext)
-            if let farmID = item.value(forKey: "farm"),
-                let serverID = item.value(forKey: "server"),
-                let secret = item.value(forKey: "secret"),
-                let id = item.value(forKey: "id") as? String {
-                let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
-                
-                image.url = url
-                album.addToHasImages(image)
-            }
-        }
-        return album
-    }
-}
 
 extension MapViewController {
     func saveLocationToUserDefaults(location: CLLocationCoordinate2D) {

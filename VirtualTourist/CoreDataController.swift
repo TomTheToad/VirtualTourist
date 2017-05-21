@@ -12,7 +12,7 @@ import CoreData
 import MapKit
 
 class CoreDataController {
-    let managedObectContext: NSManagedObjectContext = {
+    let managedObjectContext: NSManagedObjectContext = {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
             // todo: handle this
             fatalError("Internal application error")
@@ -26,28 +26,40 @@ class CoreDataController {
         fetchRequest.predicate = predicate
         
         do {
-            let results = try managedObectContext.fetch(fetchRequest)
+            let results = try managedObjectContext.fetch(fetchRequest)
             
             return results.last as? Album
         } catch {
-            // todo: throw error
+            print("Error fetching album")
+            return nil
+        }
+    }
+    
+    func fetchAlbums() -> [Album]? {
+        
+        do {
+            let albums = try managedObjectContext.fetch(Album.fetchRequest()) as [Album]
+            return albums
+        } catch {
             return nil
         }
     }
     
     func fetchImageEntity() -> Image {
-        let entity = NSEntityDescription.entity(forEntityName: "Image", in: managedObectContext)!
-        return Image(entity: entity, insertInto: managedObectContext)
+        let entity = NSEntityDescription.entity(forEntityName: "Image", in: managedObjectContext)!
+        return Image(entity: entity, insertInto: managedObjectContext)
     }
     
     func fetchAlbumEntity() -> Album {
-        let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObectContext)!
-        return Album(entity: entity, insertInto: managedObectContext)
+        let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObjectContext)!
+        return Album(entity: entity, insertInto: managedObjectContext)
     }
     
-    func converNSDictToAlbum(dictionary: [NSDictionary]) -> Album {
-        let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObectContext)!
-        let album = Album(entity: entity, insertInto: managedObectContext)
+    func convertNSDictToAlbum(dictionary: [NSDictionary], location: CLLocationCoordinate2D) -> Album {
+        let entity = NSEntityDescription.entity(forEntityName: "Album", in: managedObjectContext)!
+        let album = Album(entity: entity, insertInto: managedObjectContext)
+        album.latitude = location.latitude
+        album.longitude = location.longitude
         
         for item in dictionary {
             let image = fetchImageEntity()
@@ -61,18 +73,24 @@ class CoreDataController {
                 album.addToHasImages(image)
             }
         }
+        saveChanges()
         return album
     }
 
-    func saveAlbumChanges() {
+    func saveChanges() {
         do {
-            try managedObectContext.save()
+            try managedObjectContext.save()
+            print("MOC saved")
         } catch {
-            //todo: throw error
+            print("Unable to save MOC")
         }
     }
     
     func discardAlbumChanges() {
-        managedObectContext.rollback()
+        managedObjectContext.rollback()
+    }
+    
+    func deleteAlbum(album: Album) {
+        managedObjectContext.delete(album)
     }
 }

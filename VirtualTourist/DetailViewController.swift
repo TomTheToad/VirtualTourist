@@ -17,13 +17,6 @@ class DetailViewController: UIViewController {
     var receivedalbum: Album?
     
     let coreData = CoreDataController()
-    let managedObjectContext: NSManagedObjectContext = {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("Internal application error")
-        }
-        return appDelegate.persistentContainer.viewContext
-    }()
-    
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -40,14 +33,6 @@ class DetailViewController: UIViewController {
         collectionView!.dataSource = self
 
         setMapViewLocation(location: receivedMapLocation)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        do {
-            try managedObjectContext.save()
-        } catch {
-            print("Warning: Unable to save data!")
-        }
     }
     
 }
@@ -77,8 +62,10 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        return (album?.hasImages?.count)!
-        return 21
+        guard let count = receivedalbum?.hasImages?.array.count else {
+            return 21
+        }
+        return count
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
