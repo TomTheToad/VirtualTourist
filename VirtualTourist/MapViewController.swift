@@ -117,14 +117,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             return
         }
         
-        guard let album = coreData.fetchAlbum(location: location) else {
+        guard let pin = coreData.fetchPin(location: location) else {
             print("Album not returned from coreData")
             return
         }
         
         if doDeletePins == false {
             DispatchQueue.main.async(execute: { ()-> Void in
-                self.presentDetailView(location: location, album: album)
+                self.presentDetailView(location: location, pin: pin)
             })
         } else {
             guard let annotation = view.annotation else {
@@ -132,7 +132,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 return
             }
 
-            coreData.deleteAlbum(album: album)
+            coreData.deletePin(pin: pin)
             coreData.saveChanges()
             mapView.removeAnnotation(annotation)
             print("Album deleted")
@@ -165,7 +165,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
 extension MapViewController: CLLocationManagerDelegate {
     
-    // todo: change method to touch and another to add
     func addAnnotation(_ gestureRecognizer: UIGestureRecognizer) {
         if gestureRecognizer.state == .began {
             HideToolBar()
@@ -183,15 +182,15 @@ extension MapViewController: CLLocationManagerDelegate {
     
     func addAnnotationsFromMemory() {
 
-        guard let albums = coreData.fetchAlbums() else {
+        guard let pins = coreData.fetchPins() else {
             // todo: throw an error
-            print("Warning: failed to load albums")
+            print("Warning: failed to load pins")
             return
         }
         
-        for album in albums {
+        for pin in pins {
             let annotation = MKPointAnnotation()
-            annotation.coordinate = (CLLocationCoordinate2DMake(album.latitude, album.longitude))
+            annotation.coordinate = (CLLocationCoordinate2DMake(pin.latitude, pin.longitude))
             if doesMapViewContainAnnotation(annotation: annotation) == false {
                 mapView.addAnnotation(annotation)
             }
@@ -239,14 +238,14 @@ extension MapViewController {
         navigationController?.pushViewController(controller, animated: true)
     }
     
-    func presentDetailView(location: CLLocationCoordinate2D, album: Album) {
+    func presentDetailView(location: CLLocationCoordinate2D, pin: Pin) {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
         }
         
         controller.receivedMapLocation = location
-        controller.receivedalbum = album
+        controller.receivedPin = pin
         
         let backItem = UIBarButtonItem()
         backItem.title = "OK"
@@ -287,9 +286,9 @@ extension MapViewController {
             } else {
                 // todo: Album never sets location
                 if let images = imageItems {
-                    let album = coreData.convertNSDictToAlbum(dictionary: images, location: lastLocation!)
+                    let pin = coreData.convertNSDictToPin(dictionary: images, location: lastLocation!)
                     DispatchQueue.main.async(execute: { ()-> Void in
-                        self.presentDetailView(location: self.lastLocation!, album: album)
+                        self.presentDetailView(location: self.lastLocation!, pin: pin)
                     })
                 } else {
                     print("ERROR: missing returned urls")

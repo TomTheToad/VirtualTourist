@@ -14,7 +14,7 @@ class DetailViewController: UIViewController {
     
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
-    var receivedalbum: Album?
+    var receivedPin: Pin?
     
     let coreData = CoreDataController()
     
@@ -62,7 +62,7 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let count = receivedalbum?.hasImages?.array.count else {
+        guard let count = receivedPin?.hasPhotos?.array.count else {
             return 21
         }
         return count
@@ -80,18 +80,18 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
         cell.backgroundColor = .blue
         
-        let images = receivedalbum?.hasImages?.array as! [Image]
-        let image = images[(indexPath as NSIndexPath).row]
-        let url = URL(string: image.url!)
+        let photos = receivedPin?.hasPhotos?.array as! [Photo]
+        let photo = photos[(indexPath as NSIndexPath).row]
+        let url = URL(string: photo.url!)
         
         downloadImageFromFlikrURL(url: url!, completionHandler: {
             (data, response, error) in
             
             if error == nil {
                 // todo: check for data
-                let image = UIImage(data: data!)
+                let photoImage = UIImage(data: data!)
                 DispatchQueue.main.async(execute: { ()-> Void in
-                    cell.imageView.image = image
+                    cell.imageView.image = photoImage
                     cell.activityIndicator.stopAnimating()
                 })
             } else {

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="12141" systemVersion="16E195" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Album" representedClassName=".Album" syncable="YES">
-        <attribute name="latitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
-        <attribute name="longitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
-        <relationship name="hasImages" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Image" inverseName="withinAlbum" inverseEntity="Image" syncable="YES"/>
-    </entity>
-    <entity name="Image" representedClassName=".Image" syncable="YES">
+    <entity name="Photo" representedClassName=".Photo" syncable="YES">
         <attribute name="image" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES" syncable="YES"/>
         <attribute name="url" attributeType="String" syncable="YES"/>
-        <relationship name="withinAlbum" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Album" inverseName="hasImages" inverseEntity="Album" syncable="YES"/>
+        <relationship name="withinPin" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Pin" inverseName="hasPhotos" inverseEntity="Pin" syncable="YES"/>
+    </entity>
+    <entity name="Pin" representedClassName=".Pin" syncable="YES">
+        <attribute name="latitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="longitude" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="hasPhotos" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="Photo" inverseName="withinPin" inverseEntity="Photo" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Album" positionX="-54" positionY="-9" width="128" height="90"/>
-        <element name="Image" positionX="-36" positionY="36" width="128" height="90"/>
+        <element name="Pin" positionX="-54" positionY="-9" width="128" height="90"/>
+        <element name="Photo" positionX="-36" positionY="36" width="128" height="90"/>
     </elements>
 </model>
