@@ -286,7 +286,7 @@ extension MapViewController {
             } else {
                 // todo: Album never sets location
                 if let images = imageItems {
-                    let pin = coreData.convertNSDictToPin(dictionary: images, location: lastLocation!)
+                    let pin = coreData.convertNSDictArrayToPin(dictionary: images, location: lastLocation!)
                     DispatchQueue.main.async(execute: { ()-> Void in
                         self.presentDetailView(location: self.lastLocation!, pin: pin)
                     })

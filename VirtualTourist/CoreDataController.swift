@@ -45,36 +45,43 @@ class CoreDataController {
         }
     }
     
+    // todo: test managed object entity again. Photo.entity()
     func fetchPhotoEntity() -> Photo {
         let entity = NSEntityDescription.entity(forEntityName: "Photo", in: managedObjectContext)!
         return Photo(entity: entity, insertInto: managedObjectContext)
     }
     
+    // todo: test managed object entity again. Pin.entity()
     func fetchPinEntity() -> Pin {
         let entity = NSEntityDescription.entity(forEntityName: "Pin", in: managedObjectContext)!
         return Pin(entity: entity, insertInto: managedObjectContext)
     }
     
-    func convertNSDictToPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) -> Pin {
-        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: managedObjectContext)!
-        let pin = Pin(entity: entity, insertInto: managedObjectContext)
+    func convertNSDictArrayToPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) -> Pin {
+        let pin = fetchPinEntity()
         pin.latitude = location.latitude
         pin.longitude = location.longitude
         
         for item in dictionary {
-            let photo = fetchPhotoEntity()
-            if let farmID = item.value(forKey: "farm"),
-                let serverID = item.value(forKey: "server"),
-                let secret = item.value(forKey: "secret"),
-                let id = item.value(forKey: "id") as? String {
-                let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
-                
-                photo.url = url
-                pin.addToHasPhotos(photo)
-            }
+            let photo = convertNSDictToPhoto(dictionary: item)
+            pin.addToHasPhotos(photo)
         }
+        
         saveChanges()
         return pin
+    }
+    
+    func convertNSDictToPhoto(dictionary: NSDictionary) -> Photo {
+        let photo = fetchPhotoEntity()
+        if let farmID = dictionary.value(forKey: "farm"),
+            let serverID = dictionary.value(forKey: "server"),
+            let secret = dictionary.value(forKey: "secret"),
+            let id = dictionary.value(forKey: "id") as? String {
+            let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
+            
+            photo.url = url
+        }
+        return photo
     }
 
     func saveChanges() {
