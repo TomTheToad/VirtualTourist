@@ -309,6 +309,7 @@ extension MapViewController {
     }
 }
 
+
 extension MapViewController {
     enum MapViewControllerError: Error {
         case previousLocationMissing

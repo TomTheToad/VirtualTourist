@@ -15,7 +15,6 @@ class DetailViewController: UIViewController {
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
     var receivedPin: Pin?
-    
     let coreData = CoreDataController()
     
     // IBOutlets
@@ -37,6 +36,7 @@ class DetailViewController: UIViewController {
     
 }
 
+
 extension DetailViewController: MKMapViewDelegate {
 
     func setMapViewLocation(location: CLLocationCoordinate2D?) {
@@ -49,11 +49,11 @@ extension DetailViewController: MKMapViewDelegate {
         }
         
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(thisLocation, regionRadius, regionRadius)
-        
         mapView.setRegion(coordinateRegion, animated: true)
     }
     
 }
+
 
 extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
@@ -113,8 +113,10 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         })
     
     return cell
+        
     }
 }
+
 
 extension DetailViewController {
     
@@ -150,6 +152,7 @@ extension DetailViewController {
         }
     }
 }
+
 
 extension DetailViewController {
     enum DetailViewControllerErrors: Error {

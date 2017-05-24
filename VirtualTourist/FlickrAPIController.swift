@@ -92,7 +92,6 @@ class FlickrAPIController {
         
     }
 
-    
     func ParseJSONToNSDict(JSONData: Data) throws -> [NSDictionary] {
         var parsedResults: NSDictionary?
         
