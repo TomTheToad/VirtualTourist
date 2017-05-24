@@ -36,7 +36,6 @@ class DetailViewController: UIViewController {
     
 }
 
-
 extension DetailViewController: MKMapViewDelegate {
 
     func setMapViewLocation(location: CLLocationCoordinate2D?) {
@@ -53,7 +52,6 @@ extension DetailViewController: MKMapViewDelegate {
     }
     
 }
-
 
 extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
@@ -117,7 +115,6 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     }
 }
 
-
 extension DetailViewController {
     
     func convertStringToURL(string: String) throws -> URL {
@@ -152,7 +149,6 @@ extension DetailViewController {
         }
     }
 }
-
 
 extension DetailViewController {
     enum DetailViewControllerErrors: Error {
