@@ -162,7 +162,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
 }
 
-
 extension MapViewController: CLLocationManagerDelegate {
     
     func addAnnotation(_ gestureRecognizer: UIGestureRecognizer) {
@@ -220,7 +219,6 @@ extension MapViewController: CLLocationManagerDelegate {
         }
     }
 }
-
 
 extension MapViewController {
     func presentDetailView(location: CLLocationCoordinate2D, images: [NSDictionary]) {
@@ -300,7 +298,6 @@ extension MapViewController {
 
 }
 
-
 extension MapViewController {
     func saveLocationToUserDefaults(location: CLLocationCoordinate2D) {
         UserDefaults.standard.setValuesForKeys(["latitude": location.latitude])
@@ -308,7 +305,6 @@ extension MapViewController {
         UserDefaults.standard.synchronize()
     }
 }
-
 
 extension MapViewController {
     enum MapViewControllerError: Error {
