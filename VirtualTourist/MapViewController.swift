@@ -25,7 +25,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Configure navigationView
         navigationItem.title = "Virtual Tourist"
-        addToolBar()
+        HideToolBar()
         
         // Clears selected pin(s)
         deselectAllPins()
@@ -50,6 +50,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         // Set starting location
         setMapViewLocationUserDefaults()
         
+        addToolBar()
+        
         // Configure core location
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
@@ -59,6 +61,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     /*** UI ***/
     func addToolBar() {
+        // todo: use default edit button and didSet editing instead
+        
         let editButton = UIBarButtonItem(title: "Edit", style: .plain, target: self, action: #selector(ShowToolBar(sender:)))
         
         navigationItem.rightBarButtonItem = editButton
@@ -66,7 +70,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let toolBarButtonLabel = UIBarButtonItem(title: "Select Pins to Delete", style: .plain, target: self, action: nil)
         toolBarButtonLabel.tintColor = UIColor.white
-        
         navigationController?.toolbar.barTintColor = UIColor.red
         toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
     }

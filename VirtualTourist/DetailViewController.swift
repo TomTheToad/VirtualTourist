@@ -30,8 +30,25 @@ class DetailViewController: UIViewController {
         // Configure collectionView
         collectionView!.delegate = self
         collectionView!.dataSource = self
+        
+        // todo: redundant?
+        collectionView!.allowsSelection = true
+        collectionView!.allowsMultipleSelection = true
 
         setMapViewLocation(location: receivedMapLocation)
+        
+        addToolBar()
+    }
+    
+    func addToolBar() {
+        let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        // todo: add reload images action
+        let toolBarButtonLabel = UIBarButtonItem(title: "New Collection", style: .plain, target: self, action: nil)
+        toolBarButtonLabel.tintColor = UIColor.blue
+        navigationController?.toolbar.barTintColor = UIColor.white
+        
+        toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
+        navigationController?.setToolbarHidden(false, animated: false)
     }
     
 }
@@ -49,6 +66,10 @@ extension DetailViewController: MKMapViewDelegate {
         
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(thisLocation, regionRadius, regionRadius)
         mapView.setRegion(coordinateRegion, animated: true)
+        
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = thisLocation
+        mapView.addAnnotation(annotation)
     }
     
 }

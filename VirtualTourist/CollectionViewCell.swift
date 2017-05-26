@@ -10,6 +10,16 @@ import UIKit
 
 class CollectionViewCell: UICollectionViewCell {
     
+    override var isSelected: Bool {
+        didSet {
+            if isSelected {
+                alpha = 0.5
+            } else {
+                alpha = 1.0
+            }
+        }
+    }
+    
     // IBOutlets
     @IBOutlet weak var textLabel: UILabel!
     @IBOutlet weak var imageView: UIImageView!

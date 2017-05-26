@@ -36,11 +36,12 @@
                     <navigationItem key="navigationItem" id="RkA-74-fTm"/>
                     <connections>
                         <outlet property="mapView" destination="buz-71-l7J" id="J4I-TY-J13"/>
+                        <segue destination="kL3-VI-STv" kind="show" identifier="toDetail" id="MRb-B7-Iqd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1295" y="115"/>
+            <point key="canvasLocation" x="1236" y="115"/>
         </scene>
         <!--Detail View Controller-->
         <scene sceneID="Tp6-Gy-4Gj">
@@ -55,7 +56,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Xsa-NX-dXU">
-                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
                                 <subviews>
                                     <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="inp-1o-gdn">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="211"/>
@@ -64,8 +65,8 @@
                                         </constraints>
                                     </mapView>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="xVp-Mq-XyN">
-                                        <rect key="frame" x="0.0" y="211" width="375" height="436"/>
-                                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                        <rect key="frame" x="0.0" y="211" width="375" height="392"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="A6q-B0-Rs6">
                                             <size key="itemSize" width="200" height="200"/>
                                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -124,6 +125,7 @@
                             <constraint firstItem="Xsa-NX-dXU" firstAttribute="leading" secondItem="ta9-O3-ZR7" secondAttribute="leading" id="tLs-mA-SBB"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="d4u-o4-Owb"/>
                     <connections>
                         <outlet property="collectionView" destination="xVp-Mq-XyN" id="jYE-9u-kzi"/>
                         <outlet property="mapView" destination="inp-1o-gdn" id="Ak1-NQ-lua"/>
@@ -131,7 +133,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="I7H-7M-2kj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2292" y="114.69265367316342"/>
+            <point key="canvasLocation" x="2404" y="115"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="fyU-Nb-dh3">
