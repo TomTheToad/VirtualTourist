@@ -38,21 +38,25 @@ class DetailViewController: UIViewController {
         setMapViewLocation(location: receivedMapLocation)
         
         addToolBar()
+        
     }
     
     func addToolBar() {
         let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        // todo: add reload images action
-        let toolBarButtonLabel = UIBarButtonItem(title: "New Collection", style: .plain, target: self, action: nil)
-        toolBarButtonLabel.tintColor = UIColor.blue
+        
+        let toolBarButton = UIBarButtonItem(title: "New Collection", style: .plain, target: self, action: #selector(toolBarButtonAction))
+        toolBarButton.possibleTitles = ["New Collection", "Remove Selected Pictures"]
+        toolBarButton.tintColor = UIColor.blue
+        
         navigationController?.toolbar.barTintColor = UIColor.white
         
-        toolbarItems = [toolBarFlexibleSpace, toolBarButtonLabel, toolBarFlexibleSpace]
+        toolbarItems = [toolBarFlexibleSpace, toolBarButton, toolBarFlexibleSpace]
         navigationController?.setToolbarHidden(false, animated: false)
     }
     
 }
 
+// MapView
 extension DetailViewController: MKMapViewDelegate {
 
     func setMapViewLocation(location: CLLocationCoordinate2D?) {
@@ -74,7 +78,20 @@ extension DetailViewController: MKMapViewDelegate {
     
 }
 
+// CollectionView
 extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        
+        if editing {
+            let toolBarItem = toolbarItems?[1]
+            toolBarItem?.title = "Remove selected cells"
+        } else {
+            let toolBarItem = toolbarItems?[1]
+            toolBarItem?.title = "New Collection"
+        }
+    }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -134,8 +151,29 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     return cell
         
     }
+    
+    // todo: clean this up
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        setEditing(true, animated: true)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if collectionView.indexPathsForSelectedItems!.isEmpty {
+            setEditing(false, animated: true)
+        }
+    }
+    
+    func toolBarButtonAction() {
+        if isEditing {
+            print("delete cells: \(collectionView.indexPathsForSelectedItems!)")
+        } else {
+            print("new collection")
+        }
+    }
+    
 }
 
+// Flikr
 extension DetailViewController {
     
     func convertStringToURL(string: String) throws -> URL {
@@ -176,5 +214,6 @@ extension DetailViewController {
         case failedToConvertToURL
         case ImageDataMissing
         case URLDataMissing
+        case PinDataNotReturned
     }
 }

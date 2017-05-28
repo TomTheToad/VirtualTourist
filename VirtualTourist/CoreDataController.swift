@@ -45,6 +45,19 @@ class CoreDataController {
         }
     }
     
+    // todo: Is this needed?
+    func fetchPinFetchedResultsController (location: CLLocationCoordinate2D) -> NSFetchedResultsController<Pin> {
+        let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin")
+        let predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", argumentArray: [location.latitude, location.longitude])
+        let sortDescriptor = NSSortDescriptor()
+        
+        fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        return fetchedResultsController
+    }
+    
     // todo: test managed object entity again. Photo.entity()
     func fetchPhotoEntity() -> Photo {
         let entity = NSEntityDescription.entity(forEntityName: "Photo", in: managedObjectContext)!
