@@ -2,7 +2,7 @@
 //  Photo+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by VICTOR ASSELTA on 5/21/17.
+//  Created by VICTOR ASSELTA on 6/8/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
 
@@ -18,6 +18,7 @@ extension Photo {
 
     @NSManaged public var image: NSData?
     @NSManaged public var url: String?
+    @NSManaged public var id: String?
     @NSManaged public var withinPin: Pin?
 
 }

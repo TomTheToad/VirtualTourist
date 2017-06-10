@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-class FlickrAPIController {
+class FlikrAPIController {
     
     // Fields
     let responseCheck = URLResponseCheck()
@@ -24,7 +24,7 @@ class FlickrAPIController {
     let baseURLString = "https://api.flickr.com/services/rest/"
     
     // Custom errors for this API
-    enum FlickrErrors: Error {
+    enum FlikrErrors: Error {
         case ApplicationError(msg: String)
         case NetworkRequestError(returnError: Error)
         case URLResponse(response: URLResponse)
@@ -54,7 +54,7 @@ class FlickrAPIController {
             if let thisResponse = response {
                 let responseCheck = self.responseCheck.checkReponse(thisResponse)
                 if responseCheck.0 != true {
-                    completionHander(FlickrErrors.URLResponse(response: thisResponse), nil)
+                    completionHander(FlikrErrors.URLResponse(response: thisResponse), nil)
                     print("NETWORK ERROR: \(responseCheck.1)")
                     return
                 }
@@ -67,14 +67,14 @@ class FlickrAPIController {
             
             guard let thisData = data else {
                 if let error = error  {
-                    completionHander(FlickrErrors.NetworkRequestError(returnError: error), nil)
+                    completionHander(FlikrErrors.NetworkRequestError(returnError: error), nil)
                     return
                 } else {
                     guard let thisResponse = response else {
-                        completionHander(FlickrErrors.ApplicationError(msg: "Unknown Error"), nil)
+                        completionHander(FlikrErrors.ApplicationError(msg: "Unknown Error"), nil)
                         return
                     }
-                    completionHander(FlickrErrors.URLResponse(response: thisResponse), nil)
+                    completionHander(FlikrErrors.URLResponse(response: thisResponse), nil)
                     return
                 }
             }
@@ -83,7 +83,7 @@ class FlickrAPIController {
                 let photosDict = try self.ParseJSONToNSDict(JSONData: thisData)
                 completionHander(nil, photosDict)
             } catch {
-                completionHander(FlickrErrors.JSONParseError, nil)
+                completionHander(FlikrErrors.JSONParseError, nil)
             }
             
         })
@@ -98,15 +98,22 @@ class FlickrAPIController {
         do {
             parsedResults = try JSONSerialization.jsonObject(with: JSONData, options: .allowFragments) as? NSDictionary
         } catch {
-            throw FlickrErrors.JSONParseError
+            throw FlikrErrors.JSONParseError
         }
         
         if let photos = parsedResults?.value(forKeyPath: "photos.photo") as! [NSDictionary]? {
             return photos
         } else {
-            throw FlickrErrors.JSONParseError
+            throw FlikrErrors.JSONParseError
         }
 
+    }
+    
+    func downloadImageFromFlikrURL(url: URL, completionHandler: @escaping (_ data: Data?,_ repsonse: URLResponse?,_ error: Error?) -> Void) {
+        URLSession.shared.dataTask(with: url, completionHandler: {
+            (data, response, error) in
+            completionHandler(data, response, error)
+        }).resume()
     }
 
         /*

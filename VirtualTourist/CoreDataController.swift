@@ -46,7 +46,7 @@ class CoreDataController {
     }
     
     // todo: Is this needed?
-    func fetchPinFetchedResultsController (location: CLLocationCoordinate2D) -> NSFetchedResultsController<Pin> {
+    func fetchPinFetchedResultsController (location: CLLocationCoordinate2D) throws -> NSFetchedResultsController<Pin> {
         let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin")
         let predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", argumentArray: [location.latitude, location.longitude])
         let sortDescriptor = NSSortDescriptor()
@@ -55,7 +55,32 @@ class CoreDataController {
         fetchRequest.sortDescriptors = [sortDescriptor]
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            throw CoreDataErrors.FetchedResultsControllerNoDataReturned
+        }
+        
         return fetchedResultsController
+    }
+    
+    func fetchPhotosFromPinResultsController (pin: Pin) throws -> NSFetchedResultsController<Photo> {
+        let fetchRequest = NSFetchRequest<Photo>(entityName: "Photo")
+        let predicate = NSPredicate(format: "withinPin == %@", pin)
+        let sort = NSSortDescriptor(key: "id", ascending: false)
+        fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = [sort]
+        
+        let fetchResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        do {
+            try fetchResultsController.performFetch()
+        } catch {
+            throw CoreDataErrors.FetchedResultsControllerNoDataReturned
+        }
+        
+        return fetchResultsController
     }
     
     // todo: test managed object entity again. Photo.entity()
@@ -70,6 +95,20 @@ class CoreDataController {
         return Pin(entity: entity, insertInto: managedObjectContext)
     }
     
+    func createPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) {
+        let pin = fetchPinEntity()
+        pin.latitude = location.latitude
+        pin.longitude = location.longitude
+        
+        for item in dictionary {
+            let photo = convertNSDictToPhoto(dictionary: item)
+            pin.addToHasPhotos(photo)
+        }
+        saveChanges()
+    }
+    
+    
+    // todo: find better way to save entities
     func convertNSDictArrayToPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) -> Pin {
         let pin = fetchPinEntity()
         pin.latitude = location.latitude
@@ -92,6 +131,7 @@ class CoreDataController {
             let id = dictionary.value(forKey: "id") as? String {
             let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
             
+            photo.id = id
             photo.url = url
         }
         return photo
@@ -113,4 +153,9 @@ class CoreDataController {
     func deletePin(pin: Pin) {
         managedObjectContext.delete(pin)
     }
+}
+
+enum CoreDataErrors: Error {
+    case FetchedResultsControllerNoDataReturned
+    case FailedToAddPin
 }

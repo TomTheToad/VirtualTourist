@@ -20,6 +20,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     override func viewWillAppear(_ animated: Bool) {
         
@@ -34,32 +35,44 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         addAnnotationsFromMemory()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        // Add bottom tool bar
+        addToolBar()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // mapView delegate
-        mapView.delegate = self
-        mapView.mapType = .standard
-        mapView.isRotateEnabled = false
-        
-        // Gesture Recognizer
-        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addAnnotation(_:)))
-        longPressRecognizer.isEnabled = true
-        mapView.addGestureRecognizer(longPressRecognizer)
-        
+        // Configure mapView
+        configureMapView()
+
         // Set starting location
         setMapViewLocationUserDefaults()
         
-        addToolBar()
-        
         // Configure core location
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        locationManager.requestWhenInUseAuthorization()
+        configureCoreLocation()
 
     }
     
     /*** UI ***/
+    func configureMapView() {
+        mapView.delegate = self
+        mapView.mapType = .standard
+        mapView.isRotateEnabled = false
+        mapView.addGestureRecognizer(fetchLongPressRecognizer())
+    }
+    
+    func configureCoreLocation() {
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        locationManager.requestWhenInUseAuthorization()
+    }
+    
+    func fetchLongPressRecognizer() -> UILongPressGestureRecognizer {
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(MapViewController.addAnnotation(_:)))
+        longPressRecognizer.isEnabled = true
+        return longPressRecognizer
+    }
+    
     func addToolBar() {
         // todo: use default edit button and didSet editing instead
         
@@ -100,7 +113,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
         let reuseId = "pin"
-        
         var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
         
         if pinView == nil {
@@ -121,13 +133,22 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
         
         guard let pin = coreData.fetchPin(location: location) else {
-            print("Album not returned from coreData")
+            print("Pin not returned from CoreData")
             return
         }
         
-        if doDeletePins == false {
+        // attempt: try fetchedResultsController<Photo> with pin
+        var fetchResultsController: NSFetchedResultsController<Photo>?
+        do {
+            fetchResultsController = try coreData.fetchPhotosFromPinResultsController(pin: pin)
+        } catch {
+            print("WARNING: resultsController error")
+        }
+        
+        if !doDeletePins {
             DispatchQueue.main.async(execute: { ()-> Void in
-                self.presentDetailView(location: location, pin: pin)
+                // self.presentDetailView(location: location, pin: pin)
+                self.presentDetailView(location: location, fetchedResultsController: fetchResultsController!)
             })
         } else {
             guard let annotation = view.annotation else {
@@ -175,11 +196,27 @@ extension MapViewController: CLLocationManagerDelegate {
             let annotation = MKPointAnnotation()
             annotation.coordinate = newCoords
             annotation.title = "User Added Point"
+            // mapView.addAnnotation(annotation)
+            activityIndicator.startAnimating()
             
             lastLocation = newCoords
-            mapView.addAnnotation(annotation)
-            getImages(mapLocation: newCoords)
+            createNewPin(location: newCoords, errorController: { isSuccess, error in
+                DispatchQueue.main.async(execute: { ()-> Void in
+                    self.activityIndicator.stopAnimating()
+                    if isSuccess {
+                        self.mapView.addAnnotation(annotation)
+                    } else {
+                        // todo: handle error
+                        self.mapView.removeAnnotation(annotation)
+                        print(error!)
+                    }
+                })
+            })
         }
+    }
+    
+    func hideActivityIndicator() {
+        activityIndicator.stopAnimating()
     }
     
     func addAnnotationsFromMemory() {
@@ -224,7 +261,41 @@ extension MapViewController: CLLocationManagerDelegate {
 }
 
 extension MapViewController {
-    func presentDetailView(location: CLLocationCoordinate2D, images: [NSDictionary]) {
+    
+    func createNewPin(location: CLLocationCoordinate2D, errorController: @escaping (_ isSuccess: Bool,_ error: Error?) -> Void) {
+        let flikr = FlikrAPIController()
+        
+        do {
+            try flikr.getImageArray(latitude: location.latitude.description, longitude: location.longitude.description, completionHander: { error, data in
+                
+                if error == nil {
+                    // handle error
+                    if let error = error {
+                        print("ERROR: \(error.localizedDescription)")
+                        errorController(false, error)
+                        // handle error, send alert
+                    } else {
+                        // todo: Album never sets location
+                        if let images = data {
+                            self.coreData.createPin(dictionary: images, location: location)
+                        } else {
+                            print("ERROR: missing returned urls")
+                        }
+                    }
+                }
+            })
+            errorController(true, nil)
+        } catch {
+            // todo: error handling
+            print("An error has occured")
+            errorController(false, CoreDataErrors.FailedToAddPin)
+        }
+    }
+    
+}
+
+extension MapViewController {
+    func presentDetailView(location: CLLocationCoordinate2D) {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
@@ -254,51 +325,22 @@ extension MapViewController {
         navigationItem.backBarButtonItem = backItem
         navigationController?.pushViewController(controller, animated: true)
     }
-}
-
-extension MapViewController {
     
-    func getImages(mapLocation: CLLocationCoordinate2D) {
-        // Get images
-        // todo: will probably need to update the api to use
-        // a fetchedResultsController
-        
-        let latitude: String = (mapLocation.latitude.description)
-        print("latitude: \(latitude)")
-        let longitude: String = (mapLocation.longitude.description)
-        print("longitude: \(longitude)")
-        
-        let flickr = FlickrAPIController()
-        
-        do {
-            try flickr.getImageArray(latitude: latitude, longitude: longitude, completionHander: getImagesCompletionHandler)
-        } catch {
-            // todo: Handle error
-            print("ERROR: Something Happened")
+    func presentDetailView(location: CLLocationCoordinate2D, fetchedResultsController: NSFetchedResultsController<Photo>) {
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
+            print("MESSAGE: Failed to instantiate collection view controller")
+            return
         }
+        
+        controller.receivedMapLocation = location
+        controller.resultsController = fetchedResultsController
+        
+        let backItem = UIBarButtonItem()
+        backItem.title = "OK"
+        
+        navigationItem.backBarButtonItem = backItem
+        navigationController?.pushViewController(controller, animated: true)
     }
-    
-    func getImagesCompletionHandler(error: Error?, imageItems: [NSDictionary]?) -> Void {
-        if error == nil {
-            // handle error
-            if let error = error {
-                print("ERROR: \(error.localizedDescription)")
-                // handle error, send alert
-            } else {
-                // todo: Album never sets location
-                if let images = imageItems {
-                    let pin = coreData.convertNSDictArrayToPin(dictionary: images, location: lastLocation!)
-                    DispatchQueue.main.async(execute: { ()-> Void in
-                        self.presentDetailView(location: self.lastLocation!, pin: pin)
-                    })
-                } else {
-                    print("ERROR: missing returned urls")
-                    // handle error, send alert
-                }
-            }
-        }
-    }
-
 }
 
 extension MapViewController {

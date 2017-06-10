@@ -15,7 +15,12 @@ class DetailViewController: UIViewController {
     // Fields
     var receivedMapLocation: CLLocationCoordinate2D?
     var receivedPin: Pin?
+    
+    let flikr = FlikrAPIController()
     let coreData = CoreDataController()
+    
+    var resultsController = NSFetchedResultsController<Photo>()
+    var pin = Pin()
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -23,6 +28,7 @@ class DetailViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         
         // Configure mapView
         mapView.delegate = self
@@ -34,12 +40,18 @@ class DetailViewController: UIViewController {
         // todo: redundant?
         collectionView!.allowsSelection = true
         collectionView!.allowsMultipleSelection = true
-
+        
         setMapViewLocation(location: receivedMapLocation)
-        
         addToolBar()
-        
     }
+    
+//    func setResultsController() {
+//        do {
+//            resultsController = try coreData.fetchPinFetchedResultsController(location: receivedMapLocation!)
+//        } catch {
+//            print("Results controller Error")
+//        }
+//    }
     
     func addToolBar() {
         let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -98,10 +110,14 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let count = receivedPin?.hasPhotos?.array.count else {
-            return 21
-        }
-        return count
+//        let count = resultsController.fetchedObjects?.first?.hasPhotos?.count
+//        print("numberOfItemsInSection: \(count!)")
+//        guard let count = receivedPin?.hasPhotos?.array.count else {
+//            return 21
+//        }
+//        return count
+        
+        return resultsController.fetchedObjects?.count ?? 21
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -115,38 +131,55 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
         cell.backgroundColor = .blue
+ 
+        // let pin = resultsController.fetchedObjects?.first! as Pin
+        // let pin = resultsController.fetchedObjects?.first!
+//        let photos = receivedPin?.hasPhotos?.array as! [Photo]
+//        let photo = photos[(indexPath as NSIndexPath).row]
         
-        let photos = receivedPin?.hasPhotos?.array as! [Photo]
-        let photo = photos[(indexPath as NSIndexPath).row]
+        let photo = resultsController.object(at: indexPath) as Photo
+        
         let url = URL(string: photo.url!)
         
-        downloadImageFromFlikrURL(url: url!, completionHandler: {
-            (data, response, error) in
-            
-            if error == nil {
-                // todo: check for data
-                let photoImage = UIImage(data: data!)
-                DispatchQueue.main.async(execute: { ()-> Void in
-                    cell.imageView.image = photoImage
-                    cell.activityIndicator.stopAnimating()
-                })
-            } else {
-                guard let thisResponse = response else {
-                    print("DV: No response")
-                    return
+        if let image = photo.image as Data? {
+            cell.id = photo.id
+            cell.imageView.image = UIImage(data: image)
+            cell.activityIndicator.stopAnimating()
+        } else {
+        
+            flikr.downloadImageFromFlikrURL(url: url!, completionHandler: {
+                (data, response, error) in
+                
+                if error == nil {
+                    // todo: check for data
+                    if let imageData = data {
+                        photo.image = NSData(data: imageData)
+                        self.coreData.saveChanges()
+                    }
+                    
+                    let photoImage = UIImage(data: data!)
+                    DispatchQueue.main.async(execute: { ()-> Void in
+                        cell.imageView.image = photoImage
+                        cell.activityIndicator.stopAnimating()
+                    })
+                } else {
+                    guard let thisResponse = response else {
+                        print("DV: No response")
+                        return
+                    }
+                    
+                    print("Response: \(thisResponse)")
+                    
+                    guard let thisError = error else {
+                        print("Error: No error")
+                        return
+                    }
+                    
+                    print("Error: \(thisError)")
                 }
                 
-                print("Response: \(thisResponse)")
-                
-                guard let thisError = error else {
-                    print("Error: No error")
-                    return
-                }
-                
-                print("Error: \(thisError)")
-            }
-            
-        })
+            })
+        }
     
     return cell
         
@@ -166,15 +199,13 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     func toolBarButtonAction() {
         if isEditing {
             print("delete cells: \(collectionView.indexPathsForSelectedItems!)")
+            collectionView.deleteItems(at: collectionView.indexPathsForSelectedItems!)
+            // collectionView.indexPathsForSelectedItems.fla
+            collectionView.reloadData()
         } else {
             print("new collection")
         }
     }
-    
-}
-
-// Flikr
-extension DetailViewController {
     
     func convertStringToURL(string: String) throws -> URL {
         
@@ -185,28 +216,7 @@ extension DetailViewController {
         return url
         
     }
-    
-    func downloadImageFromFlikrURL(url: URL, completionHandler: @escaping (_ data: Data?,_ repsonse: URLResponse?,_ error: Error?) -> Void) {
-        URLSession.shared.dataTask(with: url, completionHandler: {
-            (data, response, error) in
-            completionHandler(data, response, error)
-        }).resume()
-    }
-    
-    func getLocationImagesCompletionHandler(error: Error?, urls: [String]?) -> Void {
-        if error == nil {
-            // handle error
-            if let error = error {
-                print("ERROR: \(error.localizedDescription)")
-            } else {
-                if let urls = urls {
-                    print("DetailView received ids: \(urls)")
-                } else {
-                    print("ERROR: missing returned urls")
-                }
-            }
-        }
-    }
+
 }
 
 extension DetailViewController {
@@ -215,5 +225,6 @@ extension DetailViewController {
         case ImageDataMissing
         case URLDataMissing
         case PinDataNotReturned
+        case FetchedResultsControllerNil
     }
 }
