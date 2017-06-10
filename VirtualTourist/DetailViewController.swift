@@ -186,6 +186,12 @@ extension DetailViewController: MKMapViewDelegate {
             return
         }
         
+        guard let pin = resultsController.fetchedObjects?.first?.withinPin else {
+            // todo: handle error properly
+            print("Pin missing")
+            return
+        }
+        
         for index in indexes {
             // let photo = collectionView.cellForItem(at: index) as! CollectionViewCell
             let photo = resultsController.object(at: index)
@@ -199,10 +205,8 @@ extension DetailViewController: MKMapViewDelegate {
             print("ERROR: Problems! Many Problems!")
         }
         
-        let pin = coreData.fetchPin(location: receivedMapLocation!)
-        
         do {
-            try resultsController = coreData.fetchPhotosFromPinResultsController(pin: pin!)
+            try resultsController = coreData.fetchPhotosFromPinResultsController(pin: pin)
         } catch {
             // todo: handle error properly
             print("Error: More Problems!")
