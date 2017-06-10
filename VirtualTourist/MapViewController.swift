@@ -13,7 +13,6 @@ import CoreData
 class MapViewController: UIViewController, MKMapViewDelegate {
     
     // Fields
-    var lastLocation: CLLocationCoordinate2D?
     var locationManager = CLLocationManager()
     var doDeletePins = false
     let coreData = CoreDataController()
@@ -199,7 +198,6 @@ extension MapViewController: CLLocationManagerDelegate {
             // mapView.addAnnotation(annotation)
             activityIndicator.startAnimating()
             
-            lastLocation = newCoords
             createNewPin(location: newCoords, errorController: { isSuccess, error in
                 DispatchQueue.main.async(execute: { ()-> Void in
                     self.activityIndicator.stopAnimating()

@@ -29,7 +29,6 @@ class DetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         // Configure mapView
         mapView.delegate = self
         
@@ -44,14 +43,6 @@ class DetailViewController: UIViewController {
         setMapViewLocation(location: receivedMapLocation)
         addToolBar()
     }
-    
-//    func setResultsController() {
-//        do {
-//            resultsController = try coreData.fetchPinFetchedResultsController(location: receivedMapLocation!)
-//        } catch {
-//            print("Results controller Error")
-//        }
-//    }
     
     func addToolBar() {
         let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -110,13 +101,6 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        let count = resultsController.fetchedObjects?.first?.hasPhotos?.count
-//        print("numberOfItemsInSection: \(count!)")
-//        guard let count = receivedPin?.hasPhotos?.array.count else {
-//            return 21
-//        }
-//        return count
-        
         return resultsController.fetchedObjects?.count ?? 21
     }
     
@@ -131,11 +115,6 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
         cell.backgroundColor = .blue
- 
-        // let pin = resultsController.fetchedObjects?.first! as Pin
-        // let pin = resultsController.fetchedObjects?.first!
-//        let photos = receivedPin?.hasPhotos?.array as! [Photo]
-//        let photo = photos[(indexPath as NSIndexPath).row]
         
         let photo = resultsController.object(at: indexPath) as Photo
         

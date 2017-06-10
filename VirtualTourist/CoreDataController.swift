@@ -45,26 +45,6 @@ class CoreDataController {
         }
     }
     
-    // todo: Is this needed?
-    func fetchPinFetchedResultsController (location: CLLocationCoordinate2D) throws -> NSFetchedResultsController<Pin> {
-        let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin")
-        let predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", argumentArray: [location.latitude, location.longitude])
-        let sortDescriptor = NSSortDescriptor()
-        
-        fetchRequest.predicate = predicate
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
-        
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            throw CoreDataErrors.FetchedResultsControllerNoDataReturned
-        }
-        
-        return fetchedResultsController
-    }
-    
     func fetchPhotosFromPinResultsController (pin: Pin) throws -> NSFetchedResultsController<Photo> {
         let fetchRequest = NSFetchRequest<Photo>(entityName: "Photo")
         let predicate = NSPredicate(format: "withinPin == %@", pin)
@@ -105,22 +85,6 @@ class CoreDataController {
             pin.addToHasPhotos(photo)
         }
         saveChanges()
-    }
-    
-    
-    // todo: find better way to save entities
-    func convertNSDictArrayToPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) -> Pin {
-        let pin = fetchPinEntity()
-        pin.latitude = location.latitude
-        pin.longitude = location.longitude
-        
-        for item in dictionary {
-            let photo = convertNSDictToPhoto(dictionary: item)
-            pin.addToHasPhotos(photo)
-        }
-        
-        saveChanges()
-        return pin
     }
     
     func convertNSDictToPhoto(dictionary: NSDictionary) -> Photo {
