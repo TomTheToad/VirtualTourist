@@ -126,6 +126,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
+        // todo: add pins to annotations to avoid call to disk?
         guard let location = view.annotation?.coordinate else {
             print("Location Missing")
             return
@@ -315,7 +316,7 @@ extension MapViewController {
         }
         
         controller.receivedMapLocation = location
-        controller.receivedPin = pin
+        // controller.receivedPin = pin
         
         let backItem = UIBarButtonItem()
         backItem.title = "OK"

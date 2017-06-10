@@ -10,17 +10,15 @@ import UIKit
 import MapKit
 import CoreData
 
-class DetailViewController: UIViewController {
+class DetailViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     // Fields
+    // Received fields
     var receivedMapLocation: CLLocationCoordinate2D?
-    var receivedPin: Pin?
+    var resultsController = NSFetchedResultsController<Photo>()
     
     let flikr = FlikrAPIController()
     let coreData = CoreDataController()
-    
-    var resultsController = NSFetchedResultsController<Photo>()
-    var pin = Pin()
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -78,11 +76,6 @@ extension DetailViewController: MKMapViewDelegate {
         annotation.coordinate = thisLocation
         mapView.addAnnotation(annotation)
     }
-    
-}
-
-// CollectionView
-extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
@@ -164,7 +157,7 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
         
     }
     
-    // todo: clean this up
+    /* CollectionView */
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         setEditing(true, animated: true)
     }
@@ -178,12 +171,45 @@ extension DetailViewController: UICollectionViewDelegate, UICollectionViewDelega
     func toolBarButtonAction() {
         if isEditing {
             print("delete cells: \(collectionView.indexPathsForSelectedItems!)")
-            collectionView.deleteItems(at: collectionView.indexPathsForSelectedItems!)
-            // collectionView.indexPathsForSelectedItems.fla
-            collectionView.reloadData()
+            removeObjects()
+            // collectionView.dataSource.re
         } else {
             print("new collection")
         }
+    }
+    
+    func removeObjects() {
+        
+        guard let indexes = collectionView.indexPathsForSelectedItems else {
+            // handle error
+            print("Nothing to delete")
+            return
+        }
+        
+        for index in indexes {
+            // let photo = collectionView.cellForItem(at: index) as! CollectionViewCell
+            let photo = resultsController.object(at: index)
+            resultsController.managedObjectContext.delete(photo)
+        }
+        
+        do {
+            try resultsController.managedObjectContext.save()
+        } catch {
+            // todo: handle error properly
+            print("ERROR: Problems! Many Problems!")
+        }
+        
+        let pin = coreData.fetchPin(location: receivedMapLocation!)
+        
+        do {
+            try resultsController = coreData.fetchPhotosFromPinResultsController(pin: pin!)
+        } catch {
+            // todo: handle error properly
+            print("Error: More Problems!")
+        }
+        
+        collectionView.deleteItems(at: indexes)
+        setEditing(false, animated: true)
     }
     
     func convertStringToURL(string: String) throws -> URL {
@@ -205,5 +231,6 @@ extension DetailViewController {
         case URLDataMissing
         case PinDataNotReturned
         case FetchedResultsControllerNil
+        case FetchedResultsControllerFailedToRemoveObject
     }
 }
