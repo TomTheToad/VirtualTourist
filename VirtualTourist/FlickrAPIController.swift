@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import CoreLocation
 
 class FlikrAPIController {
     
@@ -42,9 +43,12 @@ class FlikrAPIController {
     // lat, lon, radius, accuracy, safe_search, unit, radius_units, page, per_page
     // return a dictionary
      
-    func getImageArray(latitude: String, longitude: String, completionHander: @escaping (Error?, [NSDictionary]?) -> Void) throws {
+    func getImageArray(location: CLLocationCoordinate2D, page: Int, completionHander: @escaping (Error?, [NSDictionary]?) -> Void) throws {
         
-        let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&page=1&per_page=21"
+        let latitude = location.latitude
+        let longitude = location.longitude
+        
+        let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&\(page)&per_page=21"
         
         let request = URLRequest(url: URL(string: url)!)
         
@@ -91,6 +95,7 @@ class FlikrAPIController {
         task.resume()
         
     }
+
 
     func ParseJSONToNSDict(JSONData: Data) throws -> [NSDictionary] {
         var parsedResults: NSDictionary?

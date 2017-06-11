@@ -2,7 +2,7 @@
 //  Pin+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by VICTOR ASSELTA on 5/21/17.
+//  Created by VICTOR ASSELTA on 6/11/17.
 //  Copyright © 2017 TomTheToad. All rights reserved.
 //
 
@@ -18,6 +18,7 @@ extension Pin {
 
     @NSManaged public var latitude: Double
     @NSManaged public var longitude: Double
+    @NSManaged public var pageNumber: Int16
     @NSManaged public var hasPhotos: NSOrderedSet?
 
 }

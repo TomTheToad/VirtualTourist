@@ -79,6 +79,7 @@ class CoreDataController {
         let pin = fetchPinEntity()
         pin.latitude = location.latitude
         pin.longitude = location.longitude
+        pin.pageNumber = 1
         
         for item in dictionary {
             let photo = convertNSDictToPhoto(dictionary: item)

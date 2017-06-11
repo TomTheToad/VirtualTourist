@@ -14,7 +14,7 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     // Fields
     // Received fields
-    var receivedMapLocation: CLLocationCoordinate2D?
+    var receivedPin = Pin()
     var resultsController = NSFetchedResultsController<Photo>()
     
     let flikr = FlikrAPIController()
@@ -38,7 +38,7 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
         collectionView!.allowsSelection = true
         collectionView!.allowsMultipleSelection = true
         
-        setMapViewLocation(location: receivedMapLocation)
+        setMapViewLocation()
         addToolBar()
     }
     
@@ -60,20 +60,15 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
 // MapView
 extension DetailViewController: MKMapViewDelegate {
 
-    func setMapViewLocation(location: CLLocationCoordinate2D?) {
+    func setMapViewLocation() {
         let regionRadius: CLLocationDistance = 3000
+        let location = CLLocationCoordinate2D(latitude: receivedPin.latitude, longitude: receivedPin.longitude)
         
-        guard let thisLocation = location else {
-            // todo: create an error
-            print("WARNING: Missing map location")
-            return
-        }
-        
-        let coordinateRegion = MKCoordinateRegionMakeWithDistance(thisLocation, regionRadius, regionRadius)
+        let coordinateRegion = MKCoordinateRegionMakeWithDistance(location, regionRadius, regionRadius)
         mapView.setRegion(coordinateRegion, animated: true)
         
         let annotation = MKPointAnnotation()
-        annotation.coordinate = thisLocation
+        annotation.coordinate = location
         mapView.addAnnotation(annotation)
     }
     
@@ -174,7 +169,7 @@ extension DetailViewController: MKMapViewDelegate {
             removeObjects()
             // collectionView.dataSource.re
         } else {
-            print("new collection")
+            newPhotoPage()
         }
     }
     
@@ -198,6 +193,42 @@ extension DetailViewController: MKMapViewDelegate {
             resultsController.managedObjectContext.delete(photo)
         }
         
+        updateResultsController(pin: pin)
+        
+        collectionView.deleteItems(at: indexes)
+        setEditing(false, animated: true)
+    }
+    
+    func newPhotoPage() {
+        let pin = receivedPin
+        pin.pageNumber = pin.pageNumber + 1
+        print("pageNumber = \(pin.pageNumber)")
+        
+        let location = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
+        
+        do {
+            try flikr.getImageArray(location: location, page: Int(pin.pageNumber), completionHander: {
+            (error, dict) in
+                if error == nil {
+                    pin.removeFromHasPhotos(pin.hasPhotos!)
+                    for item in dict! {
+                        let photo = self.coreData.convertNSDictToPhoto(dictionary: item)
+                        pin.addToHasPhotos(photo)
+                    }
+                    self.updateResultsController(pin: pin)
+                } else {
+                    // todo: handle this
+                    print("Pin error has ocurred")
+                }
+            })
+        } catch {
+            //todo : handle error
+        }
+        
+        collectionView.reloadData()
+    }
+    
+    func updateResultsController(pin: Pin) {
         do {
             try resultsController.managedObjectContext.save()
         } catch {
@@ -211,9 +242,6 @@ extension DetailViewController: MKMapViewDelegate {
             // todo: handle error properly
             print("Error: More Problems!")
         }
-        
-        collectionView.deleteItems(at: indexes)
-        setEditing(false, animated: true)
     }
     
     func convertStringToURL(string: String) throws -> URL {

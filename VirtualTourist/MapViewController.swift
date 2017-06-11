@@ -147,8 +147,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         if !doDeletePins {
             DispatchQueue.main.async(execute: { ()-> Void in
-                // self.presentDetailView(location: location, pin: pin)
-                self.presentDetailView(location: location, fetchedResultsController: fetchResultsController!)
+                self.presentDetailView(pin: pin, fetchedResultsController: fetchResultsController!)
             })
         } else {
             guard let annotation = view.annotation else {
@@ -159,7 +158,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             coreData.deletePin(pin: pin)
             coreData.saveChanges()
             mapView.removeAnnotation(annotation)
-            print("Album deleted")
+            print("Pin deleted")
             
         }
     }
@@ -265,7 +264,7 @@ extension MapViewController {
         let flikr = FlikrAPIController()
         
         do {
-            try flikr.getImageArray(latitude: location.latitude.description, longitude: location.longitude.description, completionHander: { error, data in
+            try flikr.getImageArray(location: location, page: 1, completionHander: { error, data in
                 
                 if error == nil {
                     // handle error
@@ -294,44 +293,14 @@ extension MapViewController {
 }
 
 extension MapViewController {
-    func presentDetailView(location: CLLocationCoordinate2D) {
-        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
-            print("MESSAGE: Failed to instantiate collection view controller")
-            return
-        }
-        
-        controller.receivedMapLocation = location
-        
-        let backItem = UIBarButtonItem()
-        backItem.title = "OK"
-        
-        navigationItem.backBarButtonItem = backItem
-        navigationController?.pushViewController(controller, animated: true)
-    }
     
-    func presentDetailView(location: CLLocationCoordinate2D, pin: Pin) {
+    func presentDetailView(pin: Pin, fetchedResultsController: NSFetchedResultsController<Photo>) {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
         }
         
-        controller.receivedMapLocation = location
-        // controller.receivedPin = pin
-        
-        let backItem = UIBarButtonItem()
-        backItem.title = "OK"
-        
-        navigationItem.backBarButtonItem = backItem
-        navigationController?.pushViewController(controller, animated: true)
-    }
-    
-    func presentDetailView(location: CLLocationCoordinate2D, fetchedResultsController: NSFetchedResultsController<Photo>) {
-        guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
-            print("MESSAGE: Failed to instantiate collection view controller")
-            return
-        }
-        
-        controller.receivedMapLocation = location
+        controller.receivedPin = pin
         controller.resultsController = fetchedResultsController
         
         let backItem = UIBarButtonItem()
