@@ -42,11 +42,15 @@ class FlikrAPIController {
     // flickr.photos.search
     // lat, lon, radius, accuracy, safe_search, unit, radius_units, page, per_page
     // return a dictionary
-     
-    func getImageArray(location: CLLocationCoordinate2D, page: Int, completionHander: @escaping (Error?, [NSDictionary]?) -> Void) throws {
+    
+    // todo: duplicate function, add excluded image ids
+    func getImageArray(location: CLLocationCoordinate2D, completionHander: @escaping (Error?, [NSDictionary]?) -> Void) throws {
         
         let latitude = location.latitude
         let longitude = location.longitude
+        
+        let page = arc4random_uniform(50)
+        print("random page number = \(page)")
         
         let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&\(page)&per_page=21"
         
@@ -95,7 +99,6 @@ class FlikrAPIController {
         task.resume()
         
     }
-
 
     func ParseJSONToNSDict(JSONData: Data) throws -> [NSDictionary] {
         var parsedResults: NSDictionary?

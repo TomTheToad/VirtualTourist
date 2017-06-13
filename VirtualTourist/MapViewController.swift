@@ -137,17 +137,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             return
         }
         
-        // attempt: try fetchedResultsController<Photo> with pin
-        var fetchResultsController: NSFetchedResultsController<Photo>?
-        do {
-            fetchResultsController = try coreData.fetchPhotosFromPinResultsController(pin: pin)
-        } catch {
-            print("WARNING: resultsController error")
-        }
-        
         if !doDeletePins {
             DispatchQueue.main.async(execute: { ()-> Void in
-                self.presentDetailView(pin: pin, fetchedResultsController: fetchResultsController!)
+                self.presentDetailView(pin: pin)
             })
         } else {
             guard let annotation = view.annotation else {
@@ -264,7 +256,7 @@ extension MapViewController {
         let flikr = FlikrAPIController()
         
         do {
-            try flikr.getImageArray(location: location, page: 1, completionHander: { error, data in
+            try flikr.getImageArray(location: location, completionHander: { error, data in
                 
                 if error == nil {
                     // handle error
@@ -294,14 +286,13 @@ extension MapViewController {
 
 extension MapViewController {
     
-    func presentDetailView(pin: Pin, fetchedResultsController: NSFetchedResultsController<Photo>) {
+    func presentDetailView(pin: Pin) {
         guard let controller = storyboard?.instantiateViewController(withIdentifier: "DetailView") as? DetailViewController else {
             print("MESSAGE: Failed to instantiate collection view controller")
             return
         }
         
-        controller.receivedPin = pin
-        controller.resultsController = fetchedResultsController
+        controller.pin = pin
         
         let backItem = UIBarButtonItem()
         backItem.title = "OK"
