@@ -20,6 +20,37 @@ class CoreDataController {
         return appDelegate.persistentContainer.viewContext
     }()
     
+    /// Create ///
+    func createPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) {
+        let pin = fetchPinEntity()
+        pin.latitude = location.latitude
+        pin.longitude = location.longitude
+        
+        for item in dictionary {
+            let photo = convertNSDictToPhoto(dictionary: item)
+            pin.addToHasPhotos(photo)
+        }
+        saveChanges()
+    }
+    
+    func addPhotos(photos: [Photo]) {
+        for photo in photos {
+            managedObjectContext.insert(photo as NSManagedObject)
+        }
+    }
+    
+    /// Read ///
+    func fetchPhotoEntity() -> Photo {
+        let entity = NSEntityDescription.entity(forEntityName: "Photo", in: managedObjectContext)!
+        return Photo(entity: entity, insertInto: managedObjectContext)
+    }
+    
+
+    func fetchPinEntity() -> Pin {
+        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: managedObjectContext)!
+        return Pin(entity: entity, insertInto: managedObjectContext)
+    }
+    
     func fetchPin(location: CLLocationCoordinate2D) -> Pin? {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Pin")
         let predicate = NSPredicate(format: "latitude == %@ AND longitude == %@", argumentArray: [location.latitude, location.longitude])
@@ -63,76 +94,7 @@ class CoreDataController {
         return fetchResultsController
     }
     
-    // todo: test managed object entity again. Photo.entity()
-    func fetchPhotoEntity() -> Photo {
-        let entity = NSEntityDescription.entity(forEntityName: "Photo", in: managedObjectContext)!
-        return Photo(entity: entity, insertInto: managedObjectContext)
-    }
-    
-    // todo: test managed object entity again. Pin.entity()
-    func fetchPinEntity() -> Pin {
-        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: managedObjectContext)!
-        return Pin(entity: entity, insertInto: managedObjectContext)
-    }
-    
-    func createPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) {
-        let pin = fetchPinEntity()
-        pin.latitude = location.latitude
-        pin.longitude = location.longitude
-        
-        for item in dictionary {
-            let photo = convertNSDictToPhoto(dictionary: item)
-            pin.addToHasPhotos(photo)
-        }
-        saveChanges()
-    }
-    
-    func createAndReturnPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) -> Pin {
-        let pin = fetchPinEntity()
-        pin.latitude = location.latitude
-        pin.longitude = location.longitude
-        
-        for item in dictionary {
-            let photo = convertNSDictToPhoto(dictionary: item)
-            pin.addToHasPhotos(photo)
-        }
-        saveChanges()
-        return pin
-    }
-    
-    func convertNSDictToPhoto(dictionary: NSDictionary) -> Photo {
-        let photo = fetchPhotoEntity()
-        if let farmID = dictionary.value(forKey: "farm"),
-            let serverID = dictionary.value(forKey: "server"),
-            let secret = dictionary.value(forKey: "secret"),
-            let id = dictionary.value(forKey: "id") as? String {
-            let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
-            
-            photo.id = id
-            photo.url = url
-        }
-        return photo
-    }
-    
-    func convertNSDictArraytoPhotoArray(dictionaryArray: [NSDictionary]) -> [Photo] {
-        var photoArray = [Photo]()
-        for dict in dictionaryArray {
-            let photo = convertNSDictToPhoto(dictionary: dict)
-            photoArray.append(photo)
-        }
-        return photoArray
-    }
-    
-    func convertNSDictArraytoPhotoArrayWithPin(pin: Pin, dictionaryArray: [NSDictionary]) -> [Photo] {
-        var photoArray = [Photo]()
-        for dict in dictionaryArray {
-            let photo = convertNSDictToPhoto(dictionary: dict)
-            photo.withinPin = pin
-            photoArray.append(photo)
-        }
-        return photoArray
-    }
-
+    /// Update ///
     func saveChanges() {
         do {
             try managedObjectContext.save()
@@ -142,6 +104,7 @@ class CoreDataController {
         }
     }
     
+    /// Delete ///
     func discardPinChanges() {
         managedObjectContext.rollback()
     }
@@ -166,21 +129,6 @@ class CoreDataController {
         }
     }
     
-    // todo: add success and failure cases
-    func updatePhotosWithinPin(pin: Pin, newPhotos: [Photo]) {
-        deletePhotosFromPin(pin: pin)
-        for photo in newPhotos {
-            photo.withinPin = pin
-            pin.addToHasPhotos(photo)
-        }
-        
-        do {
-            try pin.managedObjectContext?.save()
-        } catch {
-            print("WARNING: Unable to save photos through Pin!")
-        }
-    }
-    
     func deletePhoto(photo: Photo) {
         managedObjectContext.delete(photo as NSManagedObject)
     }
@@ -191,13 +139,33 @@ class CoreDataController {
         }
     }
     
-    func addPhotos(photos: [Photo]) {
-        for photo in photos {
-            managedObjectContext.insert(photo as NSManagedObject)
+    /// Helper Functions: Conversion ///
+    func convertNSDictToPhoto(dictionary: NSDictionary) -> Photo {
+        let photo = fetchPhotoEntity()
+        if let farmID = dictionary.value(forKey: "farm"),
+            let serverID = dictionary.value(forKey: "server"),
+            let secret = dictionary.value(forKey: "secret"),
+            let id = dictionary.value(forKey: "id") as? String {
+            let url = "https://farm\(farmID).staticflickr.com/\(serverID)/\(id)_\(secret)_t.jpg"
+            
+            photo.id = id
+            photo.url = url
         }
+        return photo
+    }
+    
+    func convertNSDictArraytoPhotoArrayWithPin(pin: Pin, dictionaryArray: [NSDictionary]) -> [Photo] {
+        var photoArray = [Photo]()
+        for dict in dictionaryArray {
+            let photo = convertNSDictToPhoto(dictionary: dict)
+            photo.withinPin = pin
+            photoArray.append(photo)
+        }
+        return photoArray
     }
 }
 
+/// Errors ///
 enum CoreDataErrors: Error {
     case FetchedResultsControllerNoDataReturned
     case FailedToAddPin

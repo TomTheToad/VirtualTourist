@@ -22,7 +22,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     override func viewWillAppear(_ animated: Bool) {
-        
         // Configure navigationView
         navigationItem.title = "Virtual Tourist"
         HideToolBar()
