@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		C7249CB21EEF801500C61C1A /* Pin+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7249CB01EEF801400C61C1A /* Pin+CoreDataClass.swift */; };
 		C7249CB31EEF801500C61C1A /* Pin+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7249CB11EEF801500C61C1A /* Pin+CoreDataProperties.swift */; };
+		C73965C71EF81730007D920C /* OKAlertGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C73965C61EF81730007D920C /* OKAlertGenerator.swift */; };
 		C75F1B951EEA181C00519F5F /* Photo+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = C75F1B931EEA181C00519F5F /* Photo+CoreDataClass.swift */; };
 		C75F1B961EEA181C00519F5F /* Photo+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C75F1B941EEA181C00519F5F /* Photo+CoreDataProperties.swift */; };
 		C77B10B81E7B88AF006B08BF /* CollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C77B10B71E7B88AF006B08BF /* CollectionViewCell.swift */; };
@@ -28,6 +29,7 @@
 /* Begin PBXFileReference section */
 		C7249CB01EEF801400C61C1A /* Pin+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Pin+CoreDataClass.swift"; sourceTree = "<group>"; };
 		C7249CB11EEF801500C61C1A /* Pin+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Pin+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C73965C61EF81730007D920C /* OKAlertGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OKAlertGenerator.swift; sourceTree = "<group>"; };
 		C75F1B931EEA181C00519F5F /* Photo+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Photo+CoreDataClass.swift"; sourceTree = "<group>"; };
 		C75F1B941EEA181C00519F5F /* Photo+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Photo+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C77B10B71E7B88AF006B08BF /* CollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionViewCell.swift; sourceTree = "<group>"; };
@@ -61,6 +63,7 @@
 			isa = PBXGroup;
 			children = (
 				C77ECEBE1E85C51300CFBB12 /* URLResponseCheck.swift */,
+				C73965C61EF81730007D920C /* OKAlertGenerator.swift */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 				C7E738791E648651000247E1 /* FlickrAPIController.swift in Sources */,
 				C7B77A121E5251AA00755DF7 /* AppDelegate.swift in Sources */,
 				C781285B1EF7434F008D0321 /* PhotoDataSource.swift in Sources */,
+				C73965C71EF81730007D920C /* OKAlertGenerator.swift in Sources */,
 				C7ACE43C1E830C7F00575840 /* DetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

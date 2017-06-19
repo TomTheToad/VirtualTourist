@@ -102,6 +102,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     /*** MapView ***/
+    // todo: add region
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         // saveLocationToCoreData(location: mapView.centerCoordinate)
         saveLocationToUserDefaults(location: mapView.centerCoordinate)
@@ -126,7 +127,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
-        // todo: add pins to annotations to avoid call to disk?
         guard let location = view.annotation?.coordinate else {
             print("Location Missing")
             return
@@ -160,11 +160,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let previousLocation: CLLocationCoordinate2D? = {
             
             guard let lat = UserDefaults.standard.object(forKey: "latitude") as? CLLocationDegrees else {
-                // do something
                 return nil
             }
             guard let long = UserDefaults.standard.object(forKey: "longitude") as? CLLocationDegrees else {
-                // do something
                 return nil
             }
             return CLLocationCoordinate2D(latitude: lat, longitude: long)
@@ -196,9 +194,14 @@ extension MapViewController: CLLocationManagerDelegate {
                     if isSuccess {
                         self.mapView.addAnnotation(annotation)
                     } else {
-                        // todo: handle error
-                        self.mapView.removeAnnotation(annotation)
-                        print(error!)
+                        guard let thisError = error else {
+                            let alert = OKAlertGenerator(alertMessage: "Sorry. I can't find images for that location. Error: Unknown")
+                            self.present(alert.getAlertToPresent(), animated: false, completion: nil)
+                            return
+                        }
+                        
+                        let alert = OKAlertGenerator(alertMessage: "Sorry. I can't find images for that location. Error: \(thisError)")
+                            self.present(alert.getAlertToPresent(), animated: false, completion: nil)
                     }
                 })
             })
@@ -212,8 +215,6 @@ extension MapViewController: CLLocationManagerDelegate {
     func addAnnotationsFromMemory() {
 
         guard let pins = coreData.fetchPins() else {
-            // todo: throw an error
-            print("Warning: failed to load pins")
             return
         }
         
@@ -261,11 +262,8 @@ extension MapViewController {
                 if error == nil {
                     // handle error
                     if let error = error {
-                        print("ERROR: \(error.localizedDescription)")
                         errorController(false, error)
-                        // handle error, send alert
                     } else {
-                        // todo: Album never sets location
                         if let images = data {
                             self.coreData.createPin(dictionary: images, location: location)
                         } else {
@@ -276,8 +274,6 @@ extension MapViewController {
             })
             errorController(true, nil)
         } catch {
-            // todo: error handling
-            print("An error has occured")
             errorController(false, CoreDataErrors.FailedToAddPin)
         }
     }
