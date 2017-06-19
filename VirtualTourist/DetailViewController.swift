@@ -10,15 +10,17 @@ import UIKit
 import MapKit
 import CoreData
 
-class DetailViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+class DetailViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, MKMapViewDelegate {
     
-    // Fields
-    // Received fields
-    var receivedPin = Pin()
-    var resultsController = NSFetchedResultsController<Photo>()
-    
+    // Dependencies
     let flikr = FlikrAPIController()
     let coreData = CoreDataController()
+    
+    // Received fields
+    var pin = Pin()
+    
+    // Data Source
+    var photoSource = PhotoDataSource()
     
     // IBOutlets
     @IBOutlet weak var mapView: MKMapView!
@@ -27,21 +29,27 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Set data
+        photoSource.photos = pin.hasPhotos?.array as! [Photo]
+        
         // Configure mapView
         mapView.delegate = self
         
         // Configure collectionView
         collectionView!.delegate = self
-        collectionView!.dataSource = self
+        collectionView!.dataSource = photoSource
         
-        // todo: redundant?
-        collectionView!.allowsSelection = true
         collectionView!.allowsMultipleSelection = true
         
         setMapViewLocation()
         addToolBar()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        coreData.saveChanges()
+    }
+    
+    /// Configure View ///
     func addToolBar() {
         let toolBarFlexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         
@@ -55,14 +63,19 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
         navigationController?.setToolbarHidden(false, animated: false)
     }
     
-}
-
-// MapView
-extension DetailViewController: MKMapViewDelegate {
-
+    func toolBarButtonAction() {
+        if isEditing {
+            print("delete cells: \(collectionView.indexPathsForSelectedItems!)")
+            removeObjects()
+        } else {
+            newPhotoPage()
+        }
+    }
+    
+    /// Configure MapView ///
     func setMapViewLocation() {
         let regionRadius: CLLocationDistance = 3000
-        let location = CLLocationCoordinate2D(latitude: receivedPin.latitude, longitude: receivedPin.longitude)
+        let location = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
         
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(location, regionRadius, regionRadius)
         mapView.setRegion(coordinateRegion, animated: true)
@@ -70,6 +83,17 @@ extension DetailViewController: MKMapViewDelegate {
         let annotation = MKPointAnnotation()
         annotation.coordinate = location
         mapView.addAnnotation(annotation)
+    }
+    
+    // Configure CollectionView ///
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        setEditing(true, animated: true)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if collectionView.indexPathsForSelectedItems!.isEmpty {
+            setEditing(false, animated: true)
+        }
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
@@ -84,14 +108,6 @@ extension DetailViewController: MKMapViewDelegate {
         }
     }
     
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return resultsController.fetchedObjects?.count ?? 21
-    }
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         let width = collectionView.frame.width / 3
@@ -99,123 +115,46 @@ extension DetailViewController: MKMapViewDelegate {
         return CGSize(width: width - 3, height: height)
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "DetailCollectionViewCell", for: indexPath) as! CollectionViewCell
-        cell.backgroundColor = .blue
-        
-        let photo = resultsController.object(at: indexPath) as Photo
-        
-        let url = URL(string: photo.url!)
-        
-        if let image = photo.image as Data? {
-            cell.id = photo.id
-            cell.imageView.image = UIImage(data: image)
-            cell.activityIndicator.stopAnimating()
-        } else {
-        
-            flikr.downloadImageFromFlikrURL(url: url!, completionHandler: {
-                (data, response, error) in
-                
-                if error == nil {
-                    // todo: check for data
-                    if let imageData = data {
-                        photo.image = NSData(data: imageData)
-                        self.coreData.saveChanges()
-                    }
-                    
-                    let photoImage = UIImage(data: data!)
-                    DispatchQueue.main.async(execute: { ()-> Void in
-                        cell.imageView.image = photoImage
-                        cell.activityIndicator.stopAnimating()
-                    })
-                } else {
-                    guard let thisResponse = response else {
-                        print("DV: No response")
-                        return
-                    }
-                    
-                    print("Response: \(thisResponse)")
-                    
-                    guard let thisError = error else {
-                        print("Error: No error")
-                        return
-                    }
-                    
-                    print("Error: \(thisError)")
-                }
-                
-            })
-        }
-    
-    return cell
-        
-    }
-    
-    /* CollectionView */
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        setEditing(true, animated: true)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if collectionView.indexPathsForSelectedItems!.isEmpty {
-            setEditing(false, animated: true)
-        }
-    }
-    
-    func toolBarButtonAction() {
-        if isEditing {
-            print("delete cells: \(collectionView.indexPathsForSelectedItems!)")
-            removeObjects()
-            // collectionView.dataSource.re
-        } else {
-            newPhotoPage()
-        }
-    }
-    
+    /// Photo Collection Editing ///
     func removeObjects() {
         
-        guard let indexes = collectionView.indexPathsForSelectedItems else {
+        guard let indexArray = collectionView.indexPathsForSelectedItems else {
             // handle error
             print("Nothing to delete")
             return
         }
         
-        guard let pin = resultsController.fetchedObjects?.first?.withinPin else {
-            // todo: handle error properly
-            print("Pin missing")
-            return
-        }
-        
-        for index in indexes {
-            // let photo = collectionView.cellForItem(at: index) as! CollectionViewCell
-            let photo = resultsController.object(at: index)
-            resultsController.managedObjectContext.delete(photo)
-        }
-        
-        updateResultsController(pin: pin)
-        
-        collectionView.deleteItems(at: indexes)
+        photoSource.deletePhotos(indexArray: indexArray)
+        collectionView.deleteItems(at: indexArray)
+        deletePhotosAssociatedWithPin(pin: pin, indexPathArray: indexArray)
         setEditing(false, animated: true)
     }
     
+    /// Replace CollectionView Page functionality
     func newPhotoPage() {
-        let pin = receivedPin
-        pin.pageNumber = pin.pageNumber + 1
-        print("pageNumber = \(pin.pageNumber)")
-        
         let location = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
         
         do {
-            try flikr.getImageArray(location: location, page: Int(pin.pageNumber), completionHander: {
+            try flikr.getImageArray(location: location, completionHander: {
             (error, dict) in
                 if error == nil {
-                    pin.removeFromHasPhotos(pin.hasPhotos!)
-                    for item in dict! {
-                        let photo = self.coreData.convertNSDictToPhoto(dictionary: item)
-                        pin.addToHasPhotos(photo)
+                    self.coreData.deletePhotos(photos: self.photoSource.photos)
+                    
+                    guard let photosDictArray = dict else {
+                        // todo: handle error
+                        return
                     }
-                    self.updateResultsController(pin: pin)
+                    
+                    let newPhotos = self.coreData.convertNSDictArraytoPhotoArrayWithPin(pin: self.pin, dictionaryArray: photosDictArray)
+                    
+                    self.photoSource.replacePhotos(photoArray: newPhotos)
+                    self.coreData.addPhotos(photos: newPhotos)
+                    
+                    DispatchQueue.main.async(execute: { ()-> Void in
+                        self.collectionView.reloadData()
+                        self.updateAllCollectionViewPhotos()
+                    })
+                    
                 } else {
                     // todo: handle this
                     print("Pin error has ocurred")
@@ -223,35 +162,31 @@ extension DetailViewController: MKMapViewDelegate {
             })
         } catch {
             //todo : handle error
-        }
-        
-        collectionView.reloadData()
-    }
-    
-    func updateResultsController(pin: Pin) {
-        do {
-            try resultsController.managedObjectContext.save()
-        } catch {
-            // todo: handle error properly
-            print("ERROR: Problems! Many Problems!")
-        }
-        
-        do {
-            try resultsController = coreData.fetchPhotosFromPinResultsController(pin: pin)
-        } catch {
-            // todo: handle error properly
-            print("Error: More Problems!")
+            print("ERROR: newPhotoPage")
         }
     }
     
-    func convertStringToURL(string: String) throws -> URL {
-        
-        guard let url = URL(string: string) else {
-            throw DetailViewControllerErrors.failedToConvertToURL
+    func replaceCollectionViewPhoto(indexPath: IndexPath, NewPhoto: Photo ) {
+        // outsource this pin.replaceHasPhotos(at: indexPath.item, with: NewPhoto)
+        collectionView.deleteItems(at: [indexPath])
+        collectionView.insertItems(at: [indexPath])
+    }
+    
+    // todo: break this into two functions
+    func updateAllCollectionViewPhotos() {
+        DispatchQueue.main.async(execute: { ()-> Void in
+            self.collectionView.performBatchUpdates({ Void in
+                self.collectionView.deleteItems(at: self.collectionView.indexPathsForVisibleItems)
+                self.collectionView.insertItems(at: self.collectionView.indexPathsForVisibleItems)
+            }, completion: {Void in print("MESSAGE: replaceAllCollectionViewPhotos completed") })
+        })
+    }
+    
+    func deletePhotosAssociatedWithPin(pin: Pin, indexPathArray: [IndexPath]) {
+        for indexPath in indexPathArray {
+            let photo = pin.hasPhotos?.array[indexPath.row] as! Photo
+            coreData.deletePhoto(photo: photo)
         }
-        
-        return url
-        
     }
 
 }

@@ -79,13 +79,25 @@ class CoreDataController {
         let pin = fetchPinEntity()
         pin.latitude = location.latitude
         pin.longitude = location.longitude
-        pin.pageNumber = 1
         
         for item in dictionary {
             let photo = convertNSDictToPhoto(dictionary: item)
             pin.addToHasPhotos(photo)
         }
         saveChanges()
+    }
+    
+    func createAndReturnPin(dictionary: [NSDictionary], location: CLLocationCoordinate2D) -> Pin {
+        let pin = fetchPinEntity()
+        pin.latitude = location.latitude
+        pin.longitude = location.longitude
+        
+        for item in dictionary {
+            let photo = convertNSDictToPhoto(dictionary: item)
+            pin.addToHasPhotos(photo)
+        }
+        saveChanges()
+        return pin
     }
     
     func convertNSDictToPhoto(dictionary: NSDictionary) -> Photo {
@@ -100,6 +112,25 @@ class CoreDataController {
             photo.url = url
         }
         return photo
+    }
+    
+    func convertNSDictArraytoPhotoArray(dictionaryArray: [NSDictionary]) -> [Photo] {
+        var photoArray = [Photo]()
+        for dict in dictionaryArray {
+            let photo = convertNSDictToPhoto(dictionary: dict)
+            photoArray.append(photo)
+        }
+        return photoArray
+    }
+    
+    func convertNSDictArraytoPhotoArrayWithPin(pin: Pin, dictionaryArray: [NSDictionary]) -> [Photo] {
+        var photoArray = [Photo]()
+        for dict in dictionaryArray {
+            let photo = convertNSDictToPhoto(dictionary: dict)
+            photo.withinPin = pin
+            photoArray.append(photo)
+        }
+        return photoArray
     }
 
     func saveChanges() {
@@ -117,6 +148,53 @@ class CoreDataController {
     
     func deletePin(pin: Pin) {
         managedObjectContext.delete(pin)
+    }
+    
+    func deletePhotosFromPin(pin: Pin) {
+        do {
+            let photos = try fetchPhotosFromPinResultsController(pin: pin)
+            for photo in photos.fetchedObjects! {
+                photos.managedObjectContext.delete(photo)
+            }
+            do {
+                try photos.managedObjectContext.save()
+            } catch {
+                print("Unable to delete photo objects")
+            }
+        } catch {
+            print("Unable to delete photo objects")
+        }
+    }
+    
+    // todo: add success and failure cases
+    func updatePhotosWithinPin(pin: Pin, newPhotos: [Photo]) {
+        deletePhotosFromPin(pin: pin)
+        for photo in newPhotos {
+            photo.withinPin = pin
+            pin.addToHasPhotos(photo)
+        }
+        
+        do {
+            try pin.managedObjectContext?.save()
+        } catch {
+            print("WARNING: Unable to save photos through Pin!")
+        }
+    }
+    
+    func deletePhoto(photo: Photo) {
+        managedObjectContext.delete(photo as NSManagedObject)
+    }
+    
+    func deletePhotos(photos: [Photo]) {
+        for photo in photos {
+            managedObjectContext.delete(photo as NSManagedObject)
+        }
+    }
+    
+    func addPhotos(photos: [Photo]) {
+        for photo in photos {
+            managedObjectContext.insert(photo as NSManagedObject)
+        }
     }
 }
 
