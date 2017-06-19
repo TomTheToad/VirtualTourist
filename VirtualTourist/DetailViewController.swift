@@ -86,6 +86,8 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
         let annotation = MKPointAnnotation()
         annotation.coordinate = location
         mapView.addAnnotation(annotation)
+        
+        mapView.isUserInteractionEnabled = false
     }
     
     // Configure CollectionView ///

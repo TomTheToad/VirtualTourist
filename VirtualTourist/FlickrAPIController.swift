@@ -48,8 +48,7 @@ class FlikrAPIController {
         let latitude = location.latitude
         let longitude = location.longitude
         
-        let page = arc4random_uniform(50)
-        print("random page number = \(page)")
+        let page = arc4random_uniform(20)
         
         let url = baseURLString + "?" + "method=\(method)&api_key=\(key)&format=json&nojsoncallback=1&lat=\(latitude)&lon=\(longitude)&radius=5&radius_units=mi&accuracy=11&safe_search=2&\(page)&per_page=21"
         
@@ -99,6 +98,7 @@ class FlikrAPIController {
         
     }
 
+    // Parse from JSON to NSDict
     func ParseJSONToNSDict(JSONData: Data) throws -> [NSDictionary] {
         var parsedResults: NSDictionary?
         
@@ -116,6 +116,7 @@ class FlikrAPIController {
 
     }
     
+    // Flikr image download function
     func downloadImageFromFlikrURL(url: URL, completionHandler: @escaping (_ data: Data?,_ repsonse: URLResponse?,_ error: Error?) -> Void) {
         URLSession.shared.dataTask(with: url, completionHandler: {
             (data, response, error) in

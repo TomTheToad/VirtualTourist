@@ -101,9 +101,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     /*** MapView ***/
-    // todo: add region
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        // saveLocationToCoreData(location: mapView.centerCoordinate)
         saveLocationToUserDefaults(location: mapView.centerCoordinate)
         print("MESSAGE: mapView region did change")
     }
