@@ -150,8 +150,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             coreData.deletePin(pin: pin)
             coreData.saveChanges()
             mapView.removeAnnotation(annotation)
-            print("Pin deleted")
-            
         }
     }
     

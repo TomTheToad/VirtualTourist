@@ -22,8 +22,10 @@ class PhotoDataSource: NSObject, UICollectionViewDataSource {
     }
     
     // Data functions
+    // todo: either maintain full array with "missing image" photo or sort indexes before delete.
     func deletePhotos(indexArray: [IndexPath]) {
-        for index in indexArray {
+        let sortedIndexes = indexArray.sorted(by: >)
+        for index in sortedIndexes {
             photos.remove(at: index[1])
         }
     }
