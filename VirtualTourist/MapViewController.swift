@@ -45,10 +45,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
 
         // Set starting location
         setMapViewLocationUserDefaults()
-        
-        // Configure core location
-        configureCoreLocation()
-
     }
     
     /*** UI ***/
@@ -57,12 +53,6 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.mapType = .standard
         mapView.isRotateEnabled = false
         mapView.addGestureRecognizer(fetchLongPressRecognizer())
-    }
-    
-    func configureCoreLocation() {
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
-        locationManager.requestWhenInUseAuthorization()
     }
     
     func fetchLongPressRecognizer() -> UILongPressGestureRecognizer {
@@ -102,8 +92,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     /*** MapView ***/
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        saveLocationToUserDefaults(location: mapView.centerCoordinate)
-        print("MESSAGE: mapView region did change")
+        saveLocationToUserDefaults(location: mapView.centerCoordinate, radius: nil)
     }
     
     // Configure mapView
@@ -155,12 +144,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func setMapViewLocationUserDefaults() {
-        let regionRadius: CLLocationDistance = 15000
+        let regionRadius: CLLocationDistance = {
+            guard let radius = UserDefaults.standard.object(forKey: "radius") else {
+                return 15000
+            }
+            return radius as! Double
+        }()
+        
         let previousLocation: CLLocationCoordinate2D? = {
             
             guard let lat = UserDefaults.standard.object(forKey: "latitude") as? CLLocationDegrees else {
                 return nil
             }
+            
             guard let long = UserDefaults.standard.object(forKey: "longitude") as? CLLocationDegrees else {
                 return nil
             }
@@ -298,9 +294,13 @@ extension MapViewController {
 }
 
 extension MapViewController {
-    func saveLocationToUserDefaults(location: CLLocationCoordinate2D) {
+    func saveLocationToUserDefaults(location: CLLocationCoordinate2D, radius: Double? = nil) {
         UserDefaults.standard.setValuesForKeys(["latitude": location.latitude])
         UserDefaults.standard.setValuesForKeys(["longitude": location.longitude])
+        
+        if let thisRadius = radius {
+            UserDefaults.standard.setValuesForKeys(["radius": thisRadius])
+        }
         UserDefaults.standard.synchronize()
     }
 }

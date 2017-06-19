@@ -170,7 +170,6 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
     }
     
     func replaceCollectionViewPhoto(indexPath: IndexPath, NewPhoto: Photo ) {
-        // outsource this pin.replaceHasPhotos(at: indexPath.item, with: NewPhoto)
         collectionView.deleteItems(at: [indexPath])
         collectionView.insertItems(at: [indexPath])
     }
@@ -181,7 +180,7 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
             self.collectionView.performBatchUpdates({ Void in
                 self.collectionView.deleteItems(at: self.collectionView.indexPathsForVisibleItems)
                 self.collectionView.insertItems(at: self.collectionView.indexPathsForVisibleItems)
-            }, completion: {Void in print("MESSAGE: replaceAllCollectionViewPhotos completed") })
+            }, completion: nil)
         })
     }
     
