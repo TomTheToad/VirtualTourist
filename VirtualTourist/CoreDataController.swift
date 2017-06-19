@@ -100,17 +100,6 @@ class CoreDataController {
         return pin
     }
     
-//    func replacePin(dictionary: [NSDictionary], pin: Pin, newPageNumber: Int16, location: CLLocationCoordinate2D) -> Pin {
-//        managedObjectContext.delete(pin)
-//        createPin(dictionary: dictionary, location: location)
-//        // todo: check for nil
-//        let newPin = fetchPin(location: location)!
-//        newPin.pageNumber = newPageNumber
-//        return newPin
-//        var newPin = Pin()
-//        newPin.
-//    }
-    
     func convertNSDictToPhoto(dictionary: NSDictionary) -> Photo {
         let photo = fetchPhotoEntity()
         if let farmID = dictionary.value(forKey: "farm"),
@@ -129,6 +118,16 @@ class CoreDataController {
         var photoArray = [Photo]()
         for dict in dictionaryArray {
             let photo = convertNSDictToPhoto(dictionary: dict)
+            photoArray.append(photo)
+        }
+        return photoArray
+    }
+    
+    func convertNSDictArraytoPhotoArrayWithPin(pin: Pin, dictionaryArray: [NSDictionary]) -> [Photo] {
+        var photoArray = [Photo]()
+        for dict in dictionaryArray {
+            let photo = convertNSDictToPhoto(dictionary: dict)
+            photo.withinPin = pin
             photoArray.append(photo)
         }
         return photoArray
@@ -164,6 +163,37 @@ class CoreDataController {
             }
         } catch {
             print("Unable to delete photo objects")
+        }
+    }
+    
+    // todo: add success and failure cases
+    func updatePhotosWithinPin(pin: Pin, newPhotos: [Photo]) {
+        deletePhotosFromPin(pin: pin)
+        for photo in newPhotos {
+            photo.withinPin = pin
+            pin.addToHasPhotos(photo)
+        }
+        
+        do {
+            try pin.managedObjectContext?.save()
+        } catch {
+            print("WARNING: Unable to save photos through Pin!")
+        }
+    }
+    
+    func deletePhoto(photo: Photo) {
+        managedObjectContext.delete(photo as NSManagedObject)
+    }
+    
+    func deletePhotos(photos: [Photo]) {
+        for photo in photos {
+            managedObjectContext.delete(photo as NSManagedObject)
+        }
+    }
+    
+    func addPhotos(photos: [Photo]) {
+        for photo in photos {
+            managedObjectContext.insert(photo as NSManagedObject)
         }
     }
 }
