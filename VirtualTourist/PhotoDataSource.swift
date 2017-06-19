@@ -67,7 +67,10 @@ class PhotoDataSource: NSObject, UICollectionViewDataSource {
                     // todo: check for data
                     if let imageData = data {
                         photo.image = NSData(data: imageData)
-                        self.coreData.saveChanges()
+                        let results = self.coreData.saveChanges()
+                        if results.isSucess != true {
+                            print("Error: \(results.error!)")
+                        }
                     }
                     
                     let photoImage = UIImage(data: data!)

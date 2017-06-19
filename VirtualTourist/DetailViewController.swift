@@ -46,7 +46,11 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        coreData.saveChanges()
+        let results = coreData.saveChanges()
+        if results.isSucess != true {
+            let alert = OKAlertGenerator(alertMessage: "Oops. We've Encoutered a problem. Error: \(results.error!)")
+            present(alert.getAlertToPresent(), animated: false, completion: nil)
+        }
     }
     
     /// Configure View ///
@@ -65,7 +69,6 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     func toolBarButtonAction() {
         if isEditing {
-            print("delete cells: \(collectionView.indexPathsForSelectedItems!)")
             removeObjects()
         } else {
             newPhotoPage()
@@ -119,8 +122,6 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
     func removeObjects() {
         
         guard let indexArray = collectionView.indexPathsForSelectedItems else {
-            // handle error
-            print("Nothing to delete")
             return
         }
         
@@ -156,13 +157,13 @@ class DetailViewController: UIViewController, UICollectionViewDelegate, UICollec
                     })
                     
                 } else {
-                    // todo: handle this
-                    print("Pin error has ocurred")
+                    let alert = OKAlertGenerator(alertMessage: "Oops, Please check your internet connection.")
+                    self.present(alert.getAlertToPresent(), animated: false, completion: nil)
                 }
             })
         } catch {
-            //todo : handle error
-            print("ERROR: newPhotoPage")
+            let alert = OKAlertGenerator(alertMessage: "Oops, Please check your internet connection.")
+            self.present(alert.getAlertToPresent(), animated: false, completion: nil)
         }
     }
     

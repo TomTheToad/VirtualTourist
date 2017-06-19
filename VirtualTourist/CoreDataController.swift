@@ -30,7 +30,11 @@ class CoreDataController {
             let photo = convertNSDictToPhoto(dictionary: item)
             pin.addToHasPhotos(photo)
         }
-        saveChanges()
+        let results = saveChanges()
+        
+        if results.isSucess != true {
+            print("WARNING: \(results.error!)")
+        }
     }
     
     func addPhotos(photos: [Photo]) {
@@ -95,12 +99,12 @@ class CoreDataController {
     }
     
     /// Update ///
-    func saveChanges() {
+    func saveChanges() -> (isSucess: Bool, error: Error?) {
         do {
             try managedObjectContext.save()
-            print("MOC saved")
+            return (true, nil)
         } catch {
-            print("Unable to save MOC")
+            return (false, CoreDataErrors.UnableToSaveContext)
         }
     }
     
@@ -113,7 +117,7 @@ class CoreDataController {
         managedObjectContext.delete(pin)
     }
     
-    func deletePhotosFromPin(pin: Pin) {
+    func deletePhotosFromPin(pin: Pin) -> (isSuccess: Bool, error: Error?) {
         do {
             let photos = try fetchPhotosFromPinResultsController(pin: pin)
             for photo in photos.fetchedObjects! {
@@ -122,11 +126,12 @@ class CoreDataController {
             do {
                 try photos.managedObjectContext.save()
             } catch {
-                print("Unable to delete photo objects")
+                return (false, CoreDataErrors.UnableToSaveContext)
             }
         } catch {
-            print("Unable to delete photo objects")
+            return (false, CoreDataErrors.UnableToDeleteObjects)
         }
+        return (true, nil)
     }
     
     func deletePhoto(photo: Photo) {
@@ -169,4 +174,6 @@ class CoreDataController {
 enum CoreDataErrors: Error {
     case FetchedResultsControllerNoDataReturned
     case FailedToAddPin
+    case UnableToSaveContext
+    case UnableToDeleteObjects
 }

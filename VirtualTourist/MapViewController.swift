@@ -147,7 +147,11 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             }
 
             coreData.deletePin(pin: pin)
-            coreData.saveChanges()
+            let results = coreData.saveChanges()
+            if results.isSucess != true {
+                let alert = OKAlertGenerator(alertMessage: "Oops, We've encountered an error. Error: \(results.error!)")
+                present(alert.getAlertToPresent(), animated: false, completion: nil)
+            }
             mapView.removeAnnotation(annotation)
         }
     }
