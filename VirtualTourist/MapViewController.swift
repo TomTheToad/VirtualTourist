@@ -24,7 +24,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         // Configure navigationView
         navigationItem.title = "Virtual Tourist"
-        HideToolBar()
+        hideToolBar()
         
         // Clears selected pin(s)
         deselectAllPins()
@@ -85,7 +85,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func HideToolBar() {
+    func hideToolBar() {
         navigationController?.setToolbarHidden(true, animated: false)
         doDeletePins = false
     }
@@ -174,7 +174,7 @@ extension MapViewController: CLLocationManagerDelegate {
     
     func addAnnotation(_ gestureRecognizer: UIGestureRecognizer) {
         if gestureRecognizer.state == .began {
-            HideToolBar()
+            hideToolBar()
             let touchPoint = gestureRecognizer.location(in: mapView)
             let newCoords = mapView.convert(touchPoint, toCoordinateFrom: mapView)
             let annotation = MKPointAnnotation()
