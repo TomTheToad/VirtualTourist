@@ -24,7 +24,7 @@ class PhotoDataSource: NSObject, UICollectionViewDataSource {
     // Data functions
     func deletePhotos(indexArray: [IndexPath]) {
         for index in indexArray {
-            photos.remove(at: index.row)
+            photos.remove(at: index[1])
         }
     }
     
